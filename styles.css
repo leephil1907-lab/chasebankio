@@ -58,6 +58,7 @@ img { max-width: 100%; height: auto; display: block; }
 a { color: var(--action); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { font: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
 ul { margin: 0; padding: 0; list-style: none; }
 h1, h2, h3, h4, p { margin: 0; }
 
@@ -1932,3 +1933,215 @@ body.no-scroll .chat-root { opacity: 0; pointer-events: none; transition: opacit
 
 /* reset page: request/set panels */
 #resetSet { border-top: 1px solid #E9E9E9; padding-top: 18px; margin-top: 4px; }
+
+
+/* ============================================================
+   Motion & polish system — scroll reveal, live nav flourish,
+   hero glow, card physics, page chrome.
+   Gated on .js (inline boot script) + prefers-reduced-motion;
+   app.js failsafes every reveal within 2.6s so content is
+   never withheld (phase-4 rule: motion never hides content).
+   ============================================================ */
+
+/* ---------- Scroll reveal ---------- */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .6s var(--ease) var(--rd, 0s), transform .6s var(--ease) var(--rd, 0s);
+}
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* Child cascade once a section reveals */
+.js .reveal.in .spot-card,
+.js .reveal.in .quick-card,
+.js .reveal.in .fact,
+.js .reveal.in .feature-panel { animation: riseIn .52s var(--ease) backwards; }
+.js .reveal.in .spot-card:nth-child(1), .js .reveal.in .quick-card:nth-child(1),
+.js .reveal.in .fact:nth-child(1), .js .reveal.in .feature-panel:nth-child(1) { animation-delay: .07s; }
+.js .reveal.in .spot-card:nth-child(2), .js .reveal.in .quick-card:nth-child(2),
+.js .reveal.in .fact:nth-child(2), .js .reveal.in .feature-panel:nth-child(2) { animation-delay: .14s; }
+.js .reveal.in .spot-card:nth-child(3), .js .reveal.in .quick-card:nth-child(3),
+.js .reveal.in .fact:nth-child(3), .js .reveal.in .feature-panel:nth-child(3) { animation-delay: .21s; }
+.js .reveal.in .spot-card:nth-child(4), .js .reveal.in .quick-card:nth-child(4),
+.js .reveal.in .fact:nth-child(4) { animation-delay: .28s; }
+.js .reveal.in .spot-card:nth-child(5), .js .reveal.in .quick-card:nth-child(5),
+.js .reveal.in .fact:nth-child(5) { animation-delay: .35s; }
+.js .reveal.in .spot-card:nth-child(6), .js .reveal.in .quick-card:nth-child(6),
+.js .reveal.in .fact:nth-child(6) { animation-delay: .42s; }
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Navbar flourish: sliding underline ---------- */
+.nav-trigger { position: relative; }
+.nav-trigger::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: 7px;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .26s var(--ease);
+}
+.nav-trigger:hover::after,
+.nav-item.open .nav-trigger::after,
+.nav-trigger[aria-expanded="true"]::after { transform: scaleX(1); }
+
+/* ---------- Mega menu: glassy panel + staggered links ---------- */
+.mega {
+  background: rgba(255, 255, 255, .97);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.nav-item.open .mega a,
+.nav-item:hover .mega a,
+.nav-item:focus-within .mega a { animation: megaLinkIn .34s var(--ease) backwards; }
+.nav-item.open .mega a:nth-child(1), .nav-item:hover .mega a:nth-child(1),
+.nav-item:focus-within .mega a:nth-child(1) { animation-delay: .05s; }
+.nav-item.open .mega a:nth-child(2), .nav-item:hover .mega a:nth-child(2),
+.nav-item:focus-within .mega a:nth-child(2) { animation-delay: .10s; }
+.nav-item.open .mega a:nth-child(3), .nav-item:hover .mega a:nth-child(3),
+.nav-item:focus-within .mega a:nth-child(3) { animation-delay: .15s; }
+.nav-item.open .mega a:nth-child(4), .nav-item:hover .mega a:nth-child(4),
+.nav-item:focus-within .mega a:nth-child(4) { animation-delay: .20s; }
+.nav-item.open .mega a:nth-child(5), .nav-item:hover .mega a:nth-child(5),
+.nav-item:focus-within .mega a:nth-child(5) { animation-delay: .25s; }
+.nav-item.open .mega a:nth-child(n+6), .nav-item:hover .mega a:nth-child(n+6),
+.nav-item:focus-within .mega a:nth-child(n+6) { animation-delay: .30s; }
+@keyframes megaLinkIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Drawer + utility dropdowns: animated drops, rotating carets ---------- */
+.mm-group summary { transition: background .2s var(--ease), color .2s var(--ease); }
+.mm-group .chev-r { transition: transform .3s var(--ease); }
+.mm-group[open] summary .chev-r { transform: rotate(90deg); }
+.mm-group[open] > ul { animation: ddDrop .32s var(--ease) backwards; }
+.util-menu summary .chev { transition: transform .3s var(--ease); }
+.util-menu[open] summary .chev { transform: rotate(180deg); }
+.util-menu[open] summary + ul { animation: ddDrop .3s var(--ease) backwards; }
+@keyframes ddDrop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Card physics ---------- */
+.spot-card, .quick-card {
+  transition: transform .26s var(--ease), box-shadow .26s var(--ease), border-color .26s var(--ease);
+}
+.spot-card:hover, .quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(4, 30, 66, .12);
+}
+.feature-panel {
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.feature-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(4, 30, 66, .10);
+}
+.acct-card {
+  animation: riseIn .5s var(--ease) backwards;
+  transition: transform .26s var(--ease), box-shadow .26s var(--ease), border-color .26s var(--ease);
+}
+.acct-card:nth-child(1) { animation-delay: .05s; }
+.acct-card:nth-child(2) { animation-delay: .15s; }
+.acct-card:nth-child(3) { animation-delay: .25s; }
+.acct-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(4, 30, 66, .12);
+  border-color: rgba(0, 94, 184, .45);
+}
+
+/* ---------- Home hero: slow living gradient ---------- */
+.hero { position: relative; overflow: hidden; }
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -30% -8%;
+  background:
+    radial-gradient(42% 55% at 20% 30%, rgba(255, 255, 255, .10), transparent 62%),
+    radial-gradient(38% 52% at 82% 68%, rgba(0, 96, 240, .45), transparent 66%);
+  animation: heroGlow 16s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.hero > * { position: relative; z-index: 1; }
+@keyframes heroGlow {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+  to { transform: translate3d(1.5%, 1.5%, 0) scale(1.06); }
+}
+
+/* ---------- Page chrome: scroll progress + back-to-top ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 410;
+  background: linear-gradient(90deg, var(--brand), var(--action));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+  pointer-events: none;
+}
+.scroll-progress.on { opacity: 1; }
+
+.to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--white);
+  color: var(--brand);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 26px rgba(4, 30, 66, .16);
+  z-index: 140;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity .3s var(--ease), transform .3s var(--ease), visibility .3s, box-shadow .2s, background .2s;
+  cursor: pointer;
+}
+.to-top .icon { width: 18px; height: 18px; transform: rotate(180deg); }
+.to-top.show { opacity: 1; visibility: visible; transform: none; }
+.to-top:hover {
+  background: var(--soft);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(4, 30, 66, .2);
+}
+
+/* ---------- Chat FAB settles in ---------- */
+.chat-fab { animation: fabRise .55s var(--ease) .9s backwards; }
+@keyframes fabRise {
+  from { opacity: 0; transform: translateY(14px) scale(.92); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Typography polish ---------- */
+h1, h2, h3 { letter-spacing: -.012em; text-wrap: balance; }
+p { text-wrap: pretty; }
+::selection { background: var(--brand); color: #fff; }
+
+/* ---------- Reduced motion: everything still, content visible ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .nav-trigger::after { transition: none; }
+  .nav-item.open .mega a, .nav-item:hover .mega a, .nav-item:focus-within .mega a,
+  .mm-group[open] > ul, .util-menu[open] summary + ul { animation: none !important; }
+  .mm-group .chev-r, .util-menu summary .chev { transition: none; }
+  .hero::before { animation: none !important; }
+  .acct-card, .chat-fab { animation: none !important; }
+  .spot-card, .quick-card, .feature-panel, .acct-card { transition: box-shadow .2s var(--ease), border-color .2s var(--ease); }
+  .spot-card:hover, .quick-card:hover, .feature-panel:hover, .acct-card:hover { transform: none; }
+  .to-top, .scroll-progress { transition: none; }
+}

@@ -84,7 +84,7 @@ def crumbs(page_label):
 def hero(eyebrow, h1, lede, icon=None, actions=""):
     ic = f'\n        <img class="hero-icon" src="icons/{icon}.svg" alt="" width="84" height="84" loading="eager">' if icon else ""
     act = f'\n        <div class="page-hero-actions">{actions}</div>' if actions else ""
-    return (f"""    <section class="page-hero">
+    return (f"""    <section class="page-hero reveal">
       <div class="wrap">
         {crumbs(eyebrow)}
         <p class="eyebrow">{eyebrow}</p>{ic}
@@ -108,7 +108,7 @@ def spots(title, lede, items, cols=3, sid=""):
           <a class="arrow-link" href="{href}">{link_text}<svg aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
         </article>""")
     lede_el = f'\n        <p class="section-lede">{lede}</p>' if lede else ""
-    return (f"""    <section class="section"{sec_id}>
+    return (f"""    <section class="section reveal"{sec_id}>
       <div class="wrap">
         <h2 class="section-title">{title}</h2>{lede_el}
         <div class="{cls}">
@@ -122,7 +122,7 @@ def features(heading, items, lede="", fid=""):
     lis = "\n".join(f'          <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>{i}</span></li>' for i in items)
     lede_el = f'\n        <p class="section-lede">{lede}</p>' if lede else ""
     sec_id = f' id="{fid}"' if fid else ""
-    return (f"""    <section class="section"{sec_id}>
+    return (f"""    <section class="section reveal"{sec_id}>
       <div class="wrap">
         <div class="feature-panel">
           <h2 class="section-title">{heading}</h2>{lede_el}
@@ -136,7 +136,7 @@ def features(heading, items, lede="", fid=""):
 
 def facts(items):
     f = "\n".join(f'        <div class="fact"><strong>{v}</strong><span>{l}</span></div>' for v, l in items)
-    return f"""    <section class="section" aria-label="Key numbers">
+    return f"""    <section class="section reveal" aria-label="Key numbers">
       <div class="wrap">
         <div class="facts-strip">
 {f}
@@ -147,7 +147,7 @@ def facts(items):
 
 def cta(heading, text, href, btn="Get started", cid=""):
     sec_id = f' id="{cid}"' if cid else ""
-    return f"""    <section class="section"{sec_id}>
+    return f"""    <section class="section reveal"{sec_id}>
       <div class="wrap">
         <div class="cta-band">
           <div><h2>{heading}</h2><p>{text}</p></div>
@@ -158,7 +158,7 @@ def cta(heading, text, href, btn="Get started", cid=""):
 
 
 def support_forms():
-    return """    <section class="section" id="meeting" aria-labelledby="meetingTitle">
+    return """    <section class="section reveal" id="meeting" aria-labelledby="meetingTitle">
       <div class="wrap auth-wrap">
         <div class="auth-card">
           <h2 id="meetingTitle">Schedule a meeting</h2>
@@ -221,7 +221,7 @@ def support_forms():
 
 
 def auth_block():
-    return """    <section class="section" aria-labelledby="authAdTitle">
+    return """    <section class="section reveal" aria-labelledby="authAdTitle">
       <div class="wrap">
         <div class="split-block">
           <div class="split-copy">
@@ -603,7 +603,7 @@ PAGES["sign-in.html"] = dict(
     body="\n\n".join([
         hero("Sign in", "Welcome back to Chase",
              "Sign in to view accounts, move money and manage cards &mdash; your credentials are hashed (scrypt) on this preview’s own local server and never sent to Chase."),
-        f"""    <section class="section">
+        f"""    <section class="section reveal">
       <div class="wrap auth-wrap">
         <div class="auth-card" id="signinPageCard" role="region" aria-label="Sign in form">
           <h2>Sign in to your account</h2>
@@ -659,7 +659,7 @@ PAGES["sign-up.html"] = dict(
     body="\n\n".join([
         hero("Sign up", "Create your Chase profile",
              "Three short steps. Everything you enter stays in this preview’s local database &mdash; never sent to Chase."),
-        """    <section class="section">
+        """    <section class="section reveal">
       <div class="wrap">
         <div class="auth-card" style="max-width:640px">
           <div class="signup-progress" aria-label="Sign-up progress">
@@ -728,7 +728,7 @@ PAGES["account.html"] = dict(
     title="My Account | Chase",
     desc="Your account hub — balances, activity, transfers, payments, support cases and settings for this design preview (data stored locally).",
     body="""    <div class="demo-ribbon">Design preview &mdash; not affiliated with JPMorgan Chase. Your accounts, balances and history live only in this preview&rsquo;s local database; passwords are scrypt-hashed and never sent to Chase.</div>
-    <section class="section">
+    <section class="section reveal">
       <div class="wrap">
         <div class="account-head">
           <div>
@@ -747,7 +747,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="activityTitle" id="activity">
+    <section class="section reveal" aria-labelledby="activityTitle" id="activity">
       <div class="wrap">
         <div class="section-head-row">
           <div>
@@ -762,7 +762,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="moneyTitle" id="money">
+    <section class="section reveal" aria-labelledby="moneyTitle" id="money">
       <div class="wrap">
         <h2 class="section-title" id="moneyTitle">Move money</h2>
         <p class="section-lede">Validated end-to-end by the server — every action is authorized, limited and audit-logged.</p>
@@ -819,7 +819,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="paymentsTitle" id="payments">
+    <section class="section reveal" aria-labelledby="paymentsTitle" id="payments">
       <div class="wrap">
         <h2 class="section-title" id="paymentsTitle">Payments</h2>
         <p class="section-lede">Scheduled, completed and failed payments with their current status.</p>
@@ -829,7 +829,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="casesTitle" id="cases">
+    <section class="section reveal" aria-labelledby="casesTitle" id="cases">
       <div class="wrap">
         <h2 class="section-title" id="casesTitle">Support cases</h2>
         <p class="section-lede">Open a case and follow the full message history here.</p>
@@ -851,7 +851,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="settingsTitle" id="settings">
+    <section class="section reveal" aria-labelledby="settingsTitle" id="settings">
       <div class="wrap">
         <h2 class="section-title" id="settingsTitle">Settings &amp; security</h2>
         <div class="dash-grid">
@@ -881,7 +881,7 @@ PAGES["account.html"] = dict(
       </div>
     </section>
 
-    <section class="section" aria-labelledby="quickTitle">
+    <section class="section reveal" aria-labelledby="quickTitle">
       <div class="wrap">
         <h2 class="section-title" id="quickTitle">Quick actions</h2>
         <p class="section-lede">Jump straight to the tools you use most.</p>
@@ -901,7 +901,7 @@ PAGES["404.html"] = dict(
     title="Page Not Found (404) | Chase",
     desc="The page you're looking for isn't here. Search the site or head back to the Chase demo home page.",
     body="""
-    <section class="err-wrap">
+    <section class="err-wrap reveal">
       <div class="wrap">
         <p class="err-code" aria-hidden="true">404</p>
         <h1>We can't find that page</h1>
@@ -928,7 +928,7 @@ PAGES["search.html"] = dict(
     title="Search | Chase",
     desc="Search this Chase design demo — checking, savings, cards, mortgages, business banking, investing and support topics.",
     body="""
-    <section class="search-hero" id="searchPage">
+    <section class="search-hero reveal" id="searchPage">
       <div class="wrap">
         <h1>Search Chase</h1>
         <form class="search-box" id="searchForm" role="search" action="search.html" method="get">
@@ -938,7 +938,7 @@ PAGES["search.html"] = dict(
         </form>
       </div>
     </section>
-    <section class="section">
+    <section class="section reveal">
       <div class="wrap">
         <p class="search-status" id="searchStatus" role="status">Loading&hellip;</p>
         <div class="search-results" id="searchResults"></div>
@@ -951,7 +951,7 @@ PAGES["reset-password.html"] = dict(
     page_key="reset", nav="personal",
     title="Reset Password | Chase Online",
     desc="Reset your preview password with a time-limited link from the operator console. Stored credentials are re-hashed locally and never sent to Chase.",
-    body="""    <section class="page-hero">
+    body="""    <section class="page-hero reveal">
       <div class="wrap">
         <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><a href="sign-in.html">Sign in</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Reset password</span></nav>
         <p class="eyebrow">Account access</p>
@@ -960,7 +960,7 @@ PAGES["reset-password.html"] = dict(
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal">
       <div class="wrap auth-wrap">
         <div class="auth-card" id="resetCard" role="region" aria-label="Password reset form">
           <div id="resetRequest">

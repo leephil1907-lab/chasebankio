@@ -559,7 +559,7 @@
       return;
     }
     grid.innerHTML = accts.map((a) => `
-      <div class="acct-card">
+      <div class="acct-card" data-aid="${a.id}">
         <span class="acct-tag ${a.status === "open" ? "is-open" : ""}">${a.status === "open" ? "Open" : esc(a.status)}</span>
         <span class="acct-label">${esc(a.name)}</span>
         <span class="acct-balance">${fmt(a.balanceCents)}</span>
@@ -570,6 +570,7 @@
     const rel = $("#relLine");
     if (rel) rel.textContent = `${accts.length} accounts \u00b7 ${fmt(total)} combined \u00b7 member since ${dshort(currentUser && currentUser.memberSince)}`;
     fillSelects();
+    animateBalances(grid);
   };
 
   const renderTxns = (rows) => {
@@ -1211,6 +1212,85 @@
       btn.textContent = "Set new password";
     });
   }
+
+  /* ================================================================
+     13. Motion system — scroll reveal, page chrome, balance odometer
+     ================================================================ */
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Scroll reveal: sections carry .reveal from the page generator.
+     No IO / reduced motion / 2.6s failsafe → everything visible. */
+  const revealAll = () => $$(".reveal").forEach((el) => el.classList.add("in"));
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealAll();
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("in");
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -5% 0px" });
+    const observeReveals = () => $$(".reveal:not(.in)").forEach((el) => io.observe(el));
+    observeReveals();
+    window.setTimeout(observeReveals, 500);
+    window.setTimeout(revealAll, 2600); /* failsafe: motion never withholds content */
+    window.addEventListener("load", observeReveals, { once: true });
+  }
+
+  /* Scroll progress hairline + back-to-top */
+  const progressLine = $(".scroll-progress");
+  const toTopBtn = $(".to-top");
+  let scrollTick = false;
+  const syncScrollChrome = () => {
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      scrollTick = false;
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      const p = max > 0 ? Math.min(1, doc.scrollTop / max) : 0;
+      if (progressLine) {
+        progressLine.style.transform = `scaleX(${p.toFixed(4)})`;
+        progressLine.classList.toggle("on", p > 0.015);
+      }
+      if (toTopBtn) toTopBtn.classList.toggle("show", doc.scrollTop > 640);
+    });
+  };
+  window.addEventListener("scroll", syncScrollChrome, { passive: true });
+  window.addEventListener("resize", syncScrollChrome, { passive: true });
+  syncScrollChrome();
+  if (toTopBtn) {
+    toTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    });
+  }
+
+  /* Balance odometer — rolls from the last seen value to the new one.
+     The number always lands exactly on the real balance. */
+  const balSeen = new Map();
+  const animateBalances = (grid) => {
+    if (!grid || reduceMotion) return;
+    $$(".acct-card", grid).forEach((card, idx) => {
+      const el = $(".acct-balance", card);
+      if (!el) return;
+      const id = card.dataset.aid || `i${idx}`;
+      const target = Math.round(parseFloat((el.textContent || "").replace(/[^0-9.]/g, "")) * 100);
+      if (!Number.isFinite(target)) return;
+      const from = balSeen.has(id) ? balSeen.get(id) : 0;
+      balSeen.set(id, target);
+      if (from === target) return;
+      const dur = 780, t0 = performance.now();
+      const step = (t) => {
+        const k = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - k, 3);
+        el.textContent = fmt(Math.round(from + (target - from) * eased));
+        if (k < 1) requestAnimationFrame(step);
+        else el.textContent = fmt(target);
+      };
+      requestAnimationFrame(step);
+    });
+  };
 
   document.documentElement.classList.add("chrome-ready");
   const bootSession = async () => {

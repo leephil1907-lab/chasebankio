@@ -555,7 +555,11 @@
   if (headerSlot) headerSlot.innerHTML = HEADER;
   if (footerSlot) footerSlot.innerHTML = FOOTER;
 
+  const MOTION_UI = `
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <button class="to-top" type="button" aria-label="Back to top"><svg class="icon" aria-hidden="true"><use href="#ic-chevron"/></svg></button>`;
+
   const anchor = document.createElement("div");
-  anchor.innerHTML = DRAWER + SIGNIN;
+  anchor.innerHTML = DRAWER + SIGNIN + MOTION_UI;
   while (anchor.firstElementChild) document.body.appendChild(anchor.firstElementChild);
 })();
