@@ -12,10 +12,10 @@
       const expanded = menuToggle.getAttribute("aria-expanded") === "true";
       menuToggle.setAttribute("aria-expanded", String(!expanded));
       menuToggle.setAttribute("aria-label", expanded ? "Open navigation" : "Close navigation");
-      primaryNav.classList.toggle("is-open", !expanded);
+      document.body.classList.toggle("menu-open", !expanded);
     });
     $$("a", primaryNav).forEach(link => link.addEventListener("click", () => {
-      primaryNav.classList.remove("is-open");
+      document.body.classList.remove("menu-open");
       menuToggle.setAttribute("aria-expanded", "false");
       menuToggle.setAttribute("aria-label", "Open navigation");
     }));
