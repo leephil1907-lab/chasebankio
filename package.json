@@ -2,7 +2,7 @@
   "name": "chasebankio",
   "version": "1.0.0",
   "private": true,
-  "description": "High-fidelity front-end recreation of the Chase.com homepage — static HTML/CSS/JS with self-hosted fonts, optimized imagery, full metadata and a zero-dependency build validation.",
+  "description": "Reference-matched front-end recreation of the Chase.com homepage — static HTML/CSS/JS with real reference SVG assets, self-hosted Open Sans, complete metadata and a zero-dependency build validation.",
   "scripts": {
     "build": "node scripts/validate.js",
     "test": "node scripts/validate.js",

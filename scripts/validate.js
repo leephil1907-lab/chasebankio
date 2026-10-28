@@ -121,7 +121,7 @@ const a11yChecks = [
   [/<footer/, "<footer> landmark"],
   [/<header/, "<header> landmark"],
   [/class="skip-link"/, "skip link"],
-  [/aria-label="Chase home"/, "labelled home link"],
+  [/aria-label="Chase logo, links to Chase home"/, "labelled home link"],
   [/class="sr-only">Chase home page</, "h1 present"]
 ];
 for (const [re, label] of a11yChecks) {
