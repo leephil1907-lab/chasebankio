@@ -343,7 +343,7 @@
         <div class="footer-legal-row">
           <p class="copyright">&copy; 2026 <a href="https://www.jpmorganchase.com" target="_blank" rel="noopener">JPMorgan Chase &amp; Co.</a></p>
         </div>
-        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Sign-in runs entirely in your browser; no data is sent anywhere.</p>
+        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Credentials never leave your browser; activity events reach only the site operator&rsquo;s local console.</p>
       </div>
     </div>`;
 
@@ -506,6 +506,48 @@
     configListeners.forEach((fn) => { try { fn(siteConfig); } catch {} });
     return siteConfig;
   })();
+
+  /* ---------------- Route veil (smooth page transitions) ----------------
+     Clicking an internal link raises an opaque veil before unload; the next
+     page boots with the veil covering (sessionStorage flag), then fades it
+     away together with the skeleton so navigation feels continuous. ---- */
+  const veil = document.createElement("div");
+  veil.id = "routeVeil";
+  veil.setAttribute("aria-hidden", "true");
+  document.body.appendChild(veil);
+
+  let routeNext = false;
+  try {
+    routeNext = sessionStorage.getItem("routeNext") === "1";
+    sessionStorage.removeItem("routeNext");
+  } catch {}
+  if (routeNext) veil.classList.add("covering");
+
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (!a) return;
+    const href = a.getAttribute("href");
+    if (!href || href.startsWith("#") || /^(https?:|mailto:|tel:|data:)/i.test(href)) return;
+    if (a.target === "_blank" || a.hasAttribute("download")) return;
+    try {
+      const url = new URL(href, location.href);
+      if (url.origin !== location.origin) return;
+      sessionStorage.setItem("routeNext", "1");
+    } catch { return; }
+    veil.classList.add("covering");
+  });
+
+  window.__routeVeilDone = () => {
+    if (!veil.classList.contains("covering")) return;
+    veil.classList.add("gone");
+    window.setTimeout(() => { veil.remove(); window.__routeVeilDone = null; }, 480);
+  };
+  // Safety: never trap the veil (bfcache restores, aborted loads)
+  window.addEventListener("pageshow", () => {
+    window.setTimeout(() => {
+      if (veil.isConnected && veil.classList.contains("covering") && !routeNext) window.__routeVeilDone && window.__routeVeilDone();
+    }, 1500);
+  });
 
   /* ---------------- Inject ---------------- */
   const headerSlot = document.getElementById("siteHeaderSlot");

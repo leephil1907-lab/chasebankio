@@ -97,15 +97,15 @@
 
   const DOCK = `
   <div class="chat-fab-wrap">
-    <button class="chat-fab" id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">
-      <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-fab-icon"><path fill="currentColor" d="M12 3C6.9 3 3 6.6 3 11c0 2.3 1.1 4.4 2.9 5.8L5.2 20c-.1.5.4.9.9.6l3.7-2c.7.2 1.5.3 2.2.3 5.1 0 9-3.6 9-8s-3.9-8-9-8Zm-4.6 9.6a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Zm4.6 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Zm4.6 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"/></svg>
+    <button class="chat-fab" id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel" aria-label="Open support chat">
+      <img class="chat-fab-avatar" src="favicon.svg" alt="" width="26" height="26">
       <span class="chat-fab-label">Chat</span>
     </button>
   </div>
   <section class="chat-panel" id="chatPanel" hidden aria-label="Support chat">
     <header class="chat-head">
       <div class="chat-head-main">
-        <strong>Chase support</strong>
+        <strong><img class="chat-mark" src="favicon.svg" alt="" width="18" height="18"> Chase support</strong>
         <span class="chat-pill" id="chatPill" data-state="bot">Assistant · automated</span>
       </div>
       <button class="icon-btn" id="chatClose" type="button" aria-label="Close chat">
@@ -157,12 +157,14 @@
   const addMsg = (who, text, links) => {
     const row = document.createElement("div");
     row.className = "chat-msg chat-msg-" + who;
-    let html = `<div class="chat-bubble">${text.replace(/\n/g, "<br>")}`;
+    const av = (who === "user") ? "" :
+      `<img class="chat-av${who === "admin" ? " chat-av-support" : ""}" src="favicon.svg" alt="" width="22" height="22">`;
+    let html = `${av}<div class="chat-msg-body"><div class="chat-bubble">${text.replace(/\n/g, "<br>")}`;
     if (links && links.length) {
       html += `<span class="chat-links">` +
         links.map(([l, h]) => `<a href="${esc(h)}">${esc(l)}</a>`).join("") + `</span>`;
     }
-    html += `</div><span class="chat-meta">${who === "user" ? "You" : who === "admin" ? "Support" : "Assistant"}</span>`;
+    html += `</div><span class="chat-meta">${who === "user" ? "You" : who === "admin" ? "Support" : "Assistant"}</span></div>`;
     row.innerHTML = html;
     log().appendChild(row);
     log().scrollTop = log().scrollHeight;
@@ -252,6 +254,7 @@
     const thread = {
       id: "th_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
       name, contact, note,
+      visitor: (window.SiteNotify && window.SiteNotify.visitor) || "",
       page: location.pathname,
       transcript,
       status: "open",
@@ -378,7 +381,9 @@
     history().slice(-6).forEach((m) => {
       const row = document.createElement("div");
       row.className = "chat-msg chat-msg-" + m.who;
-      row.innerHTML = `<div class="chat-bubble">${m.text.replace(/\n/g, "<br>")}</div><span class="chat-meta">${m.who === "user" ? "You" : m.who === "admin" ? "Support" : "Assistant"}</span>`;
+      const av = (m.who === "user") ? "" :
+        `<img class="chat-av${m.who === "admin" ? " chat-av-support" : ""}" src="favicon.svg" alt="" width="22" height="22">`;
+      row.innerHTML = `${av}<div class="chat-msg-body"><div class="chat-bubble">${m.text.replace(/\n/g, "<br>")}</div><span class="chat-meta">${m.who === "user" ? "You" : m.who === "admin" ? "Support" : "Assistant"}</span></div>`;
       log().appendChild(row);
     });
 

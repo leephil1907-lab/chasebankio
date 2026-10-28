@@ -127,3 +127,13 @@ See `chase-admin/README.md` for run instructions.
   chat toggle.
 - Offline drill **PASS** — console down ⇒ honest queued wording; console back
   ⇒ outbox auto-drains, both events delivered.
+
+## Phase 4 — oversight, motion & branding polish (latest)
+
+- **Console oversight:** the operator console (outside this repo) gained **Users** (registered profiles + sign-in-only, joined to journeys) and **Activity** (every site event, filterable, incl. page views); the dashboard shows registered-user and page-view counters.
+- **Page-view beacon:** `notify.js` assigns a stable anonymous visitor id (`localStorage.chase_visitor`, no personal data) and posts a best-effort `page_view` event per page — never queued, never triggers email; all events carry the visitor id.
+- **Chat branding:** the floating chat launcher, panel header and message rows use the official Chase octagon (`favicon.svg`); no invented artwork.
+- **Motion system:** cross-page route veil (white, z-520) + staggered section entrances + micro-interactions; `prefers-reduced-motion` respected and content always ends fully visible; z-index stack audited so drawers/dialogs/toasts/skeleton never overlap the chat layer.
+- **Logo fit:** header logo exactly centered on mobile/tablet (`grid 1fr auto 1fr`), anchored left on desktop, rendered 126×24 with no distortion.
+- **Honesty copy:** the account ribbon states credentials never leave the browser and that usage events reach only the operator's local console.
+- **Evidence:** `phase4` QA (23 checks: console users/activity, avatar, overlap, logo, veil, Español) + full e2e/crawl/offline suites green.

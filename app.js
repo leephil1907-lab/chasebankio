@@ -23,6 +23,7 @@
     skeletonDone = true;
     document.documentElement.classList.remove("is-loading");
     document.body.classList.add("page-ready");
+    if (window.__routeVeilDone) window.__routeVeilDone();
   };
   const armSkeleton = () => {
     const elapsed = performance.now();

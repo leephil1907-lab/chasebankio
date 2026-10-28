@@ -1,16 +1,32 @@
 /* ============================================================
    notify.js — site → admin notification client.
-   Events (feedback, meeting requests, sign-ups, sign-ins) are
-   POSTed to the admin console endpoint from site-config.json.
-   If the console is offline the event is queued in this browser
-   and flushed automatically later — status text everywhere is
-   honest about which of the two happened.
+   • Meaningful events (feedback, meeting, signup, signin, chat
+     handoff) POST to the admin console endpoint; if it is offline
+     they queue in this browser and auto-flush later — status text
+     is always honest about which happened.
+   • A random per-browser visitor id rides on every event so the
+     console can piece together one visitor's journey.
+   • page_view beacons are best-effort ONLY (never queued) so the
+     activity feed stays live without ever flooding the outbox.
    ============================================================ */
 (() => {
   "use strict";
 
   const QUEUE_KEY = "chase_notify_outbox";
+  const VISITOR_KEY = "chase_visitor";
   const MAX_QUEUE = 50;
+
+  /* Stable anonymous id for this browser (no personal data). */
+  const visitor = (() => {
+    try {
+      let v = localStorage.getItem(VISITOR_KEY);
+      if (!v) {
+        v = "vis_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+        localStorage.setItem(VISITOR_KEY, v);
+      }
+      return v;
+    } catch { return "vis_anon"; }
+  })();
 
   const readQueue = () => {
     try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); }
@@ -68,6 +84,7 @@
       type,
       payload: payload || {},
       page: location.pathname + location.search,
+      visitor,
       ts: new Date().toISOString()
     };
     // Wait for config so the endpoint is known.
@@ -86,16 +103,37 @@
     }
   };
 
+  /* Best-effort page view — never queued, dropped silently if offline. */
+  const pageView = async () => {
+    if (window.SiteConfig && window.SiteConfig.ready) {
+      try { await window.SiteConfig.ready; } catch {}
+    }
+    try {
+      await post("/api/events", {
+        id: "pv_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: "page_view",
+        payload: {
+          title: document.title.split("|")[0].trim().slice(0, 80),
+          w: innerWidth, h: innerHeight
+        },
+        page: location.pathname + location.search,
+        visitor,
+        ts: new Date().toISOString()
+      });
+    } catch { /* console offline — views are dropped, not queued */ }
+  };
+
   const pending = () => readQueue().length;
 
-  window.SiteNotify = { send, flush, pending, endpoint };
+  window.SiteNotify = { send, flush, pending, endpoint, visitor, pageView };
 
-  /* Flush when the console comes online: on boot and periodically. */
+  /* Boot: flush the outbox, then report the view. */
   const boot = async () => {
     if (window.SiteConfig && window.SiteConfig.ready) {
       try { await window.SiteConfig.ready; } catch {}
     }
     flush();
+    pageView();
   };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);

@@ -99,6 +99,16 @@ Brand `#005EB8` · action `#0060F0` · green `#138842` · ink `#131313` · secon
 | Site operations | Chase-internal tooling | Operator console **outside the repo** (never linked from the site): banner, maintenance mode, hero copy, contact, chat toggle, injected CSS/HTML — published via git; inbox; chat supervision; audit log; PAT in RAM only | ✅ delivered |
 | Admin page in the site? | n/a | **Deliberately excluded** — no route, link or file in this repository, per requirement | ✅ |
 
+### 9.4 Phase 4 (oversight & motion)
+
+| Add-on | Why |
+|---|---|
+| Console **Users** + **Activity** sections, dashboard user/view counters | Operator asked to oversee every user and every site activity, including the user dashboard |
+| Anonymous `page_view` beacon + visitor id on events | Powers activity oversight; never queued, never emailed, no personal data |
+| Floating chat launcher with the official Chase octagon | Requested chat-avatar branding (real favicon asset, no invented art) |
+| Route veil, staggered entrances, micro-interactions | Requested motion-driven feel with smooth route flow; reduced-motion safe, content always ends visible |
+| Exact mobile logo centering / desktop anchoring | Requested pixel-perfect logo fit on both breakpoints |
+
 ## 10. Known deviations (intentional, documented)
 
 1. **Noindex + `robots.txt` Disallow** — standing rule for the demo.
