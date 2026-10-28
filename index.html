@@ -76,11 +76,11 @@
     <!-- Hero -->
     <section class="hero" aria-label="Featured offer">
       <div class="wrap hero-grid">
-        <p class="hero-promo"><span class="hero-enjoy">Enjoy</span><strong class="hero-amount">$400</strong></p>
+        <p class="hero-promo"><span class="hero-enjoy">Enjoy</span><strong class="hero-amount" id="heroAmount">$400</strong></p>
         <div class="hero-copy">
-          <h2>New Chase checking customers</h2>
-          <p>Open a Chase Total Checking&reg; account with qualifying activities.</p>
-          <a class="btn btn-green" href="sign-up.html?offer=checking">Open an account</a>
+          <h2 id="heroTitle">New Chase checking customers</h2>
+          <p id="heroBody">Open a Chase Total Checking&reg; account with qualifying activities.</p>
+          <a class="btn btn-green" href="sign-up.html?offer=checking" id="heroCta">Open an account</a>
         </div>
 
         <!-- Embedded sign-in card: desktop hero only (mobile uses the overlay) -->
@@ -233,6 +233,8 @@
   <footer class="site-footer" id="siteFooterSlot"></footer>
 
   <script src="chrome.js" defer></script>
+  <script src="notify.js" defer></script>
+  <script src="chat.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

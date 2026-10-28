@@ -54,7 +54,7 @@
       <div class="wrap">
         <h2 class="section-title">Popular support actions</h2>
         <div class="spot-grid">
-        <article class="spot-card" id="meeting">
+        <article class="spot-card">
           <img class="spot-icon" src="icons/check.svg" alt="" width="46" height="46" loading="lazy">
           <h3>Schedule a meeting</h3>
           <p>Book time with a banker at a branch near you or connect by phone or video.</p>
@@ -66,7 +66,7 @@
           <p>Lock your card, report fraud and learn how we protect every sign-in.</p>
           <a class="arrow-link" href="support.html#security">Stay secure<svg aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
         </article>
-        <article class="spot-card" id="feedback">
+        <article class="spot-card">
           <img class="spot-icon" src="icons/people-message.svg" alt="" width="46" height="46" loading="lazy">
           <h3>Send feedback</h3>
           <p>Tell us what's working and what isn't &mdash; your feedback reaches the teams that build the site.</p>
@@ -90,11 +90,72 @@
       </div>
     </section>
 
+    <section class="section" id="meeting" aria-labelledby="meetingTitle">
+      <div class="wrap auth-wrap">
+        <div class="auth-card">
+          <h2 id="meetingTitle">Schedule a meeting</h2>
+          <p class="sub">Pick a topic and a time that suits you &mdash; we'll confirm through the support console.</p>
+          <form id="meetingForm" novalidate>
+            <div class="field-grid">
+              <div class="field"><label for="mtName">Full name</label><input id="mtName" type="text" autocomplete="name" maxlength="60"><span class="field-error"></span></div>
+              <div class="field"><label for="mtEmail">Email</label><input id="mtEmail" type="email" autocomplete="email" maxlength="80"><span class="field-error"></span></div>
+              <div class="field full"><label for="mtTopic">What's it about?</label>
+                <select id="mtTopic">
+                  <option>Checking &amp; savings</option>
+                  <option>Credit cards</option>
+                  <option>Home loans &amp; mortgage</option>
+                  <option>Auto financing</option>
+                  <option>Investing</option>
+                  <option>Business banking</option>
+                  <option>Something else</option>
+                </select>
+              </div>
+              <div class="field full"><label for="mtWhen">Preferred time</label>
+                <select id="mtWhen">
+                  <option>Weekday mornings</option>
+                  <option>Weekday afternoons</option>
+                  <option>Weekday evenings</option>
+                  <option>Saturday</option>
+                </select>
+              </div>
+              <div class="field full"><label for="mtNote">Notes <span class="opt">(optional)</span></label><textarea id="mtNote" rows="3" maxlength="500"></textarea></div>
+            </div>
+            <div class="form-status" id="mtStatus" role="status" hidden></div>
+            <button class="btn btn-blue btn-block" type="submit">Request meeting</button>
+          </form>
+        </div>
+
+        <div class="auth-card" id="feedback" role="region" aria-labelledby="feedbackTitle">
+          <h2 id="feedbackTitle">Send feedback</h2>
+          <p class="sub">Tell us what's working and what isn't. Messages go straight to the site operator's support console.</p>
+          <form id="feedbackForm" novalidate>
+            <div class="field-grid">
+              <div class="field"><label for="fbName">Name</label><input id="fbName" type="text" autocomplete="name" maxlength="60"><span class="field-error"></span></div>
+              <div class="field"><label for="fbEmail">Email <span class="opt">(optional)</span></label><input id="fbEmail" type="email" autocomplete="email" maxlength="80"><span class="field-error"></span></div>
+              <div class="field full"><label for="fbCat">Category</label>
+                <select id="fbCat">
+                  <option>General feedback</option>
+                  <option>Report a problem</option>
+                  <option>Compliment</option>
+                  <option>Complaint</option>
+                  <option>Suggestion</option>
+                </select>
+              </div>
+              <div class="field full"><label for="fbMsg">Message</label><textarea id="fbMsg" rows="4" maxlength="1000"></textarea><span class="field-error"></span></div>
+            </div>
+            <div class="form-status" id="fbStatus" role="status" hidden></div>
+            <button class="btn btn-blue btn-block" type="submit">Send message</button>
+          </form>
+          <p class="contact-line">Published contact: <a data-contact-email></a><span data-contact-phone></span><span data-contact-hours></span></p>
+        </div>
+      </div>
+    </section>
+
     <section class="section">
       <div class="wrap">
         <div class="cta-band">
-          <div><h2>Talk to a real person</h2><p>Schedule a meeting with a Chase banker to talk through checking, mortgages, business banking and more.</p></div>
-          <a class="btn btn-white" href="support.html#meeting">Schedule a meeting</a>
+          <div><h2>Not sure where to start?</h2><p>Search every page of the site, or open a chat with the automated assistant at the bottom of the screen.</p></div>
+          <a class="btn btn-white" href="search.html">Search the site</a>
         </div>
       </div>
     </section>
@@ -128,6 +189,8 @@
 
   <script src="chrome.js" defer></script>
   <script src="site-index.js" defer></script>
+  <script src="notify.js" defer></script>
+  <script src="chat.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

@@ -142,7 +142,9 @@
         submit.classList.remove("is-busy");
         submit.disabled = false;
         submit.textContent = label;
-        setSession({ name: user.value.trim(), username: user.value.trim(), at: Date.now() });
+        const uname = user.value.trim();
+        setSession({ name: uname, username: uname, at: Date.now() });
+        if (window.SiteNotify) window.SiteNotify.send("signin", { username: uname }).catch(() => {});
         goAccount();
       }, 650);
     };
@@ -439,6 +441,7 @@
       btn.textContent = "Creating account…";
       window.setTimeout(() => {
         setSession({ name, username: u, email, at: Date.now() });
+        if (window.SiteNotify) window.SiteNotify.send("signup", { name, username: u, email }).catch(() => {});
         $$(".su-step", signup).forEach((s) => { s.hidden = true; });
         chips.forEach((c) => { c.classList.remove("active"); c.classList.add("done"); });
         const done = $("#suSuccess");
@@ -517,6 +520,87 @@
       history.replaceState(null, "", "search.html" + (v ? `?q=${encodeURIComponent(v)}` : ""));
       runSearch(v, results, status);
     });
+  }
+
+  /* ================================================================
+     10b. Support forms → notification events (console or queue)
+     ================================================================ */
+  const formStatus = (el, state, msg) => {
+    if (!el) return;
+    el.hidden = false;
+    el.classList.toggle("is-error", state === "error");
+    el.classList.toggle("is-ok", state === "ok");
+    el.textContent = msg;
+  };
+  const invalidField = (input, msg) => {
+    const f = input.closest(".field");
+    if (f) {
+      f.classList.add("invalid");
+      const err = f.querySelector(".field-error");
+      if (err) err.textContent = msg;
+    }
+    input.focus();
+    return false;
+  };
+  const clearField = (input) => {
+    const f = input.closest(".field");
+    if (f) f.classList.remove("invalid");
+  };
+  const deliver = async (type, payload, statusEl, okMsg, btn) => {
+    if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "Sending…"; }
+    const res = window.SiteNotify
+      ? await window.SiteNotify.send(type, payload)
+      : { status: "queued" };
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || "Send"; }
+    if (res.status === "sent") {
+      formStatus(statusEl, "ok", okMsg.sent);
+    } else {
+      formStatus(statusEl, "ok", okMsg.queued);
+    }
+    return res;
+  };
+  const emailOK = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+
+  const meetingForm = $("#meetingForm");
+  if (meetingForm) {
+    meetingForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#mtName"), email = $("#mtEmail");
+      [name, email].forEach(clearField);
+      if (name.value.trim().length < 2) return invalidField(name, "Enter your name.");
+      if (!emailOK(email.value)) return invalidField(email, "Enter a valid email address.");
+      await deliver("meeting", {
+        name: name.value.trim(), email: email.value.trim(),
+        topic: $("#mtTopic").value, when: $("#mtWhen").value,
+        note: $("#mtNote").value.trim()
+      }, $("#mtStatus"), {
+        sent: "Request sent to the support console — keep an eye on your inbox for confirmation.",
+        queued: "The support console is offline right now — your request is saved on this device and will be delivered as soon as it's back."
+      }, meetingForm.querySelector("button[type=submit]"));
+      meetingForm.reset();
+    });
+    ["mtName", "mtEmail"].forEach((id) => $("#" + id) && $("#" + id).addEventListener("input", (e) => clearField(e.target)));
+  }
+
+  const feedbackForm = $("#feedbackForm");
+  if (feedbackForm) {
+    feedbackForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#fbName"), email = $("#fbEmail"), msg = $("#fbMsg");
+      [name, email, msg].forEach(clearField);
+      if (name.value.trim().length < 2) return invalidField(name, "Enter your name.");
+      if (email.value.trim() && !emailOK(email.value)) return invalidField(email, "Enter a valid email address.");
+      if (msg.value.trim().length < 5) return invalidField(msg, "Tell us a little more (at least 5 characters).");
+      await deliver("feedback", {
+        name: name.value.trim(), email: email.value.trim(),
+        category: $("#fbCat").value, message: msg.value.trim()
+      }, $("#fbStatus"), {
+        sent: "Message delivered to the support console — thank you.",
+        queued: "The support console is offline — your message is saved on this device and will be delivered when it's available."
+      }, feedbackForm.querySelector("button[type=submit]"));
+      feedbackForm.reset();
+    });
+    ["fbName", "fbEmail", "fbMsg"].forEach((id) => $("#" + id) && $("#" + id).addEventListener("input", (e) => clearField(e.target)));
   }
 
   /* ================================================================

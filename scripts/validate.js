@@ -30,9 +30,9 @@ const REQUIRED_PAGES = [
 ];
 const required = [
   ...REQUIRED_PAGES,
-  "styles.css", "app.js", "chrome.js", "site-index.js", "favicon.svg",
-  "apple-touch-icon.png", "manifest.webmanifest", "robots.txt", "logo.svg",
-  "README.md",
+  "styles.css", "app.js", "chrome.js", "site-index.js", "notify.js", "chat.js",
+  "site-config.json", "favicon.svg", "apple-touch-icon.png", "manifest.webmanifest",
+  "robots.txt", "logo.svg", "COMPARISON.md", "README.md",
 ];
 for (const f of required) {
   if (!fs.existsSync(path.join(ROOT, f))) errors.push(`Missing required file: ${f}`);
@@ -213,7 +213,7 @@ for (const [srcName, text] of anchorSources) {
 }
 
 /* 10. JS syntax ---------------------------------------------------------- */
-for (const file of ["app.js", "chrome.js", "site-index.js"]) {
+for (const file of ["app.js", "chrome.js", "site-index.js", "notify.js", "chat.js"]) {
   if (!fs.existsSync(path.join(ROOT, file))) continue;
   const res = spawnSync(process.execPath, ["--check", path.join(ROOT, file)], { encoding: "utf8" });
   if (res.status !== 0) errors.push(`${file} syntax error:\n${res.stderr.trim()}`);
@@ -232,6 +232,19 @@ while ((m2 = cssUrlRe.exec(css))) {
   const url = m2[1];
   if (/^(https?:|data:)/i.test(url)) { warnings.push(`External URL in CSS: ${url}`); continue; }
   if (!fs.existsSync(path.join(ROOT, url))) errors.push(`Broken CSS url(): "${url}"`);
+}
+
+/* 11b. site-config.json parses and carries the admin control surface ------- */
+try {
+  const cfg = JSON.parse(read("site-config.json"));
+  for (const key of ["banner", "maintenance", "hero", "contact", "chat", "notifications", "inject"]) {
+    if (!(key in cfg)) errors.push(`site-config.json missing control group: ${key}`);
+  }
+  if (typeof cfg.notifications.adminEndpoint !== "string") {
+    errors.push("site-config.json notifications.adminEndpoint must be a string");
+  }
+} catch (e) {
+  errors.push(`site-config.json is not valid JSON: ${e.message}`);
 }
 
 /* 12. Every local HTML link in JS template strings exists ---------------- */

@@ -55,6 +55,8 @@ TEMPLATE = """<!doctype html>
 
   <script src="chrome.js" defer></script>
   <script src="site-index.js" defer></script>
+  <script src="notify.js" defer></script>
+  <script src="chat.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
@@ -139,6 +141,69 @@ def cta(heading, text, href, btn="Get started", cid=""):
         <div class="cta-band">
           <div><h2>{heading}</h2><p>{text}</p></div>
           <a class="btn btn-white" href="{href}">{btn}</a>
+        </div>
+      </div>
+    </section>"""
+
+
+def support_forms():
+    return """    <section class="section" id="meeting" aria-labelledby="meetingTitle">
+      <div class="wrap auth-wrap">
+        <div class="auth-card">
+          <h2 id="meetingTitle">Schedule a meeting</h2>
+          <p class="sub">Pick a topic and a time that suits you &mdash; we'll confirm through the support console.</p>
+          <form id="meetingForm" novalidate>
+            <div class="field-grid">
+              <div class="field"><label for="mtName">Full name</label><input id="mtName" type="text" autocomplete="name" maxlength="60"><span class="field-error"></span></div>
+              <div class="field"><label for="mtEmail">Email</label><input id="mtEmail" type="email" autocomplete="email" maxlength="80"><span class="field-error"></span></div>
+              <div class="field full"><label for="mtTopic">What's it about?</label>
+                <select id="mtTopic">
+                  <option>Checking &amp; savings</option>
+                  <option>Credit cards</option>
+                  <option>Home loans &amp; mortgage</option>
+                  <option>Auto financing</option>
+                  <option>Investing</option>
+                  <option>Business banking</option>
+                  <option>Something else</option>
+                </select>
+              </div>
+              <div class="field full"><label for="mtWhen">Preferred time</label>
+                <select id="mtWhen">
+                  <option>Weekday mornings</option>
+                  <option>Weekday afternoons</option>
+                  <option>Weekday evenings</option>
+                  <option>Saturday</option>
+                </select>
+              </div>
+              <div class="field full"><label for="mtNote">Notes <span class="opt">(optional)</span></label><textarea id="mtNote" rows="3" maxlength="500"></textarea></div>
+            </div>
+            <div class="form-status" id="mtStatus" role="status" hidden></div>
+            <button class="btn btn-blue btn-block" type="submit">Request meeting</button>
+          </form>
+        </div>
+
+        <div class="auth-card" id="feedback" role="region" aria-labelledby="feedbackTitle">
+          <h2 id="feedbackTitle">Send feedback</h2>
+          <p class="sub">Tell us what's working and what isn't. Messages go straight to the site operator's support console.</p>
+          <form id="feedbackForm" novalidate>
+            <div class="field-grid">
+              <div class="field"><label for="fbName">Name</label><input id="fbName" type="text" autocomplete="name" maxlength="60"><span class="field-error"></span></div>
+              <div class="field"><label for="fbEmail">Email <span class="opt">(optional)</span></label><input id="fbEmail" type="email" autocomplete="email" maxlength="80"><span class="field-error"></span></div>
+              <div class="field full"><label for="fbCat">Category</label>
+                <select id="fbCat">
+                  <option>General feedback</option>
+                  <option>Report a problem</option>
+                  <option>Compliment</option>
+                  <option>Complaint</option>
+                  <option>Suggestion</option>
+                </select>
+              </div>
+              <div class="field full"><label for="fbMsg">Message</label><textarea id="fbMsg" rows="4" maxlength="1000"></textarea><span class="field-error"></span></div>
+            </div>
+            <div class="form-status" id="fbStatus" role="status" hidden></div>
+            <button class="btn btn-blue btn-block" type="submit">Send message</button>
+          </form>
+          <p class="contact-line">Published contact: <a data-contact-email></a><span data-contact-phone></span><span data-contact-hours></span></p>
         </div>
       </div>
     </section>"""
@@ -498,13 +563,13 @@ PAGES["support.html"] = dict(
         spots("Popular support actions", "", items=[
             ("check", "Schedule a meeting",
              "Book time with a banker at a branch near you or connect by phone or video.",
-             "support.html#meeting", "Book a time", "meeting"),
+             "support.html#meeting", "Book a time"),
             ("shield", "Security & fraud",
              "Lock your card, report fraud and learn how we protect every sign-in.",
              "support.html#security", "Stay secure", "security"),
             ("people-message", "Send feedback",
              "Tell us what's working and what isn't &mdash; your feedback reaches the teams that build the site.",
-             "support.html#feedback", "Share feedback", "feedback"),
+             "support.html#feedback", "Share feedback"),
         ]),
         features("Quick answers", [
             "Locked out? Reset your username or password on the sign-in page",
@@ -512,8 +577,9 @@ PAGES["support.html"] = dict(
             "Chase will never ask for your password by email, text or phone",
             "Statements, tax documents and statements live in your account hub",
         ]),
-        cta("Talk to a real person", "Schedule a meeting with a Chase banker to talk through checking, mortgages, business banking and more.",
-            "support.html#meeting", "Schedule a meeting"),
+        support_forms(),
+        cta("Not sure where to start?", "Search every page of the site, or open a chat with the automated assistant at the bottom of the screen.",
+            "search.html", "Search the site"),
         auth_block(),
     ]),
 )

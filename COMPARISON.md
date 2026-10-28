@@ -88,7 +88,18 @@ Brand `#005EB8` · action `#0060F0` · green `#138842` · ink `#131313` · secon
 | Behavioural crawl (Playwright) | `node /tmp/qa/crawl.js` | **PASS** — 15 pages × 4 viewports: zero horizontal overflow, zero console/page errors, zero failed requests, skeleton always dismisses; 74 internal URLs verified; dropdown & drawer navigation; progress bar; sign-up→account→sign-out; sign-in (page + overlay); account guard; search results; 404 with chrome |
 | Visual review | 19 screenshots | Reviewed: skeleton, home, checking, sign-up, 404, account, search, both overlays, drawer, mobile stacks — faithful to reference |
 
-## 9. Known deviations (intentional, documented)
+## 9. Phase add-ons vs the reference (support capabilities)
+
+| Capability | Reference (chase.com) | This build | Status |
+|---|---|---|---|
+| Support chat | Live-chat entry points in chase support flows | `chat.js` widget on every page: rule-based assistant with local links, explicit “Automated assistant” label, human handoff → operator console with **live two-way replies** while the console runs, honest offline queueing | ✅ functional local adaptation |
+| Meeting scheduling | “Schedule a meeting” in utility bar → scheduling flow | Real form on `support.html#meeting` (name, email, topic, preferred time) → event delivered to the operator console (or queued honestly when offline) | ✅ |
+| Feedback / contact | Feedback & contact forms in chase support | Real form `support.html#feedback` → console inbox + per-item email (webhook ⇒ real send; else honest mailto draft) | ✅ |
+| Notification email | Chase sends transactional email | **Pluggable**: admin-configured webhook starts real sends; until then every attempt is logged with its true status (sent / mailto / queued / failed) — never a false “sent” | ✅ honest-by-design |
+| Site operations | Chase-internal tooling | Operator console **outside the repo** (never linked from the site): banner, maintenance mode, hero copy, contact, chat toggle, injected CSS/HTML — published via git; inbox; chat supervision; audit log; PAT in RAM only | ✅ delivered |
+| Admin page in the site? | n/a | **Deliberately excluded** — no route, link or file in this repository, per requirement | ✅ |
+
+## 10. Known deviations (intentional, documented)
 
 1. **Noindex + `robots.txt` Disallow** — standing rule for the demo.
 2. **Search-engine verification metas omitted** — cannot exist honestly without real Search Console/Bingmaster codes.

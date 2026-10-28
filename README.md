@@ -78,3 +78,52 @@ npm run build    # alias: npm test
 - `manifest.webmanifest`, `favicon.svg`, `apple-touch-icon.png`, `robots.txt`
 - `COMPARISON.md` — one-on-one comparison against the reference website (features, components, UX/UI, icon/title/description/logo placement)
 - `fonts/`, `icons/`, `images/`, `logo.svg` — self-contained assets (no external requests)
+
+---
+
+## Operator console, notifications & chat (latest phase)
+
+The site now ships with three operator-facing capabilities, split between the
+repository and a console that lives **outside** it:
+
+### `site-config.json` — the site's control file
+Published by the admin console (git commit + push), loaded by every page at
+boot. Controls: **announcement banner**, **maintenance overlay** (with an
+operator “Preview anyway” escape), **home hero copy**, **contact details**
+(shown on the support page), **chat on/off + welcome text**, the
+**notification endpoint**, and **operator-injected CSS/HTML** for full
+override power. Missing/unreachable file ⇒ built-in defaults, zero breakage.
+
+### `notify.js` — honest event delivery
+Feedback, meeting requests, sign-ups and sign-ins are POSTed to the console
+endpoint. If the console is offline the event queues in the browser
+(`chase_notify_outbox`) and auto-flushes on the next load / every 45 s while
+browsing. UI copy always states which of the two happened — nothing ever
+claims to have been sent when it was only queued.
+
+### `chat.js` — support chat widget
+- Rule-based assistant answering checking/savings/cards/mortgages/auto/
+  investing/business/travel/security/sign-in questions with local links,
+  clearly labelled “Automated assistant”.
+- **Talk to a human**: contact + transcript handed to the console; while the
+  console runs, admin replies appear live (status pill: Assistant online /
+  Support online / replies pending); offline ⇒ queued on-device, honestly.
+- Disabled entirely via `site-config.json → chat.enabled`.
+
+### Admin console — `/home/user/chase-admin/` (NOT in this repo)
+Password-gated operator panel: dashboard (live counts + repo HEAD), content
+publishing to this repo, messages inbox, live-chat supervision with replies,
+pluggable email (webhook ⇒ real sends; otherwise honest mailto drafts),
+settings (GitHub token held **in memory only**) and a full audit log.
+See `chase-admin/README.md` for run instructions.
+
+### Evidence
+- `npm run build` **PASS 0/0** — 16 pages, 297 refs, config JSON validated.
+- Playwright crawl **PASS** — 15 pages × 4 viewports, zero errors/overflow,
+  all flows (auth, drawer, search, 404, chat) green.
+- Phase E2E **PASS (20 checks)** — bot Q&A, handoff → console → live admin
+  reply into the open chat, forms → inbox, admin login/inbox/reply UI,
+  real config publish to GitHub (`5c43881`), banner/maintenance rendering,
+  chat toggle.
+- Offline drill **PASS** — console down ⇒ honest queued wording; console back
+  ⇒ outbox auto-drains, both events delivered.

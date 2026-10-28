@@ -347,6 +347,166 @@
       </div>
     </div>`;
 
+  /* ---------------- Site config (admin-controlled via site-config.json) ---
+     The admin panel (kept outside this repository) publishes site-config.json
+     to this repo; the site loads it on boot and applies the operator's
+     controls: announcement banner, maintenance mode, hero copy, contact
+     details, chat toggle, admin endpoint for notifications/chat delivery
+     and optional injected CSS/HTML. Everything degrades to the built-in
+     defaults if the file is missing or unreachable. ---------------- */
+  const DEFAULT_CONFIG = {
+    version: 1,
+    updatedAt: "",
+    updatedBy: "",
+    banner: { enabled: false, text: "", link: "", linkLabel: "" },
+    maintenance: { enabled: false, title: "Scheduled maintenance", message: "We'll be back shortly." },
+    hero: { amount: "", title: "", body: "", ctaLabel: "", ctaHref: "" },
+    contact: { email: "", phone: "", hours: "" },
+    chat: { enabled: true, welcome: "", },
+    notifications: { adminEndpoint: "http://127.0.0.1:7788" },
+    inject: { css: "", html: "" }
+  };
+  const deepMerge = (base, over) => {
+    const out = Array.isArray(base) ? base.slice() : { ...base };
+    if (!over || typeof over !== "object") return out;
+    for (const k of Object.keys(over)) {
+      out[k] = (base && base[k] && typeof base[k] === "object" && typeof over[k] === "object")
+        ? deepMerge(base[k], over[k])
+        : over[k];
+    }
+    return out;
+  };
+  let siteConfig = DEFAULT_CONFIG;
+  const configListeners = [];
+  window.SiteConfig = {
+    get() { return siteConfig; },
+    ready: null,
+    onChange(fn) { configListeners.push(fn); },
+    endpoint() {
+      try { return new URL(siteConfig.notifications.adminEndpoint).href.replace(/\/$/, ""); }
+      catch { return ""; }
+    }
+  };
+
+  const applyConfig = () => {
+    const cfg = siteConfig;
+    const doc = document;
+
+    /* Announcement banner */
+    const header = doc.getElementById("siteHeaderSlot");
+    let banner = doc.getElementById("adminBanner");
+    if (cfg.banner.enabled && cfg.banner.text) {
+      if (!banner) {
+        banner = doc.createElement("div");
+        banner.id = "adminBanner";
+        banner.className = "site-banner";
+        banner.setAttribute("role", "region");
+        banner.setAttribute("aria-label", "Site announcement");
+        if (header && header.firstChild) header.insertBefore(banner, header.firstChild);
+        else if (header) header.appendChild(banner);
+      }
+      const text = esc(cfg.banner.text);
+      banner.innerHTML = `<div class="wrap"><p>${text}</p>` +
+        (cfg.banner.link ? ` <a href="${esc(cfg.banner.link)}">${esc(cfg.banner.linkLabel || "Learn more")}<svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>` : "") +
+        `</div>`;
+    } else if (banner) {
+      banner.remove();
+    }
+
+    /* Maintenance overlay (advisory for a static site; operators can preview) */
+    const skip = (() => { try { return sessionStorage.getItem("maintSkip") === "1"; } catch { return false; } })();
+    let maint = doc.getElementById("maintOverlay");
+    if (cfg.maintenance.enabled && !skip) {
+      if (!maint) {
+        maint = doc.createElement("div");
+        maint.id = "maintOverlay";
+        maint.className = "maint-overlay";
+        maint.innerHTML =
+          `<div class="maint-card" role="alertdialog" aria-labelledby="maintTitle">
+            <img src="logo.svg" alt="Chase" width="126" height="24">
+            <h2 id="maintTitle"></h2>
+            <p id="maintMsg"></p>
+            <div class="maint-actions">
+              <button class="btn btn-blue" type="button" id="maintPreview">Preview site anyway</button>
+            </div>
+            <p class="maint-note">Notice published by the site operator.</p>
+          </div>`;
+        doc.body.appendChild(maint);
+        const btn = maint.querySelector("#maintPreview");
+        btn.addEventListener("click", () => {
+          try { sessionStorage.setItem("maintSkip", "1"); } catch {}
+          maint.remove();
+        });
+      }
+      maint.querySelector("#maintTitle").textContent = cfg.maintenance.title || "Scheduled maintenance";
+      maint.querySelector("#maintMsg").textContent = cfg.maintenance.message || "";
+      doc.documentElement.classList.add("is-maint");
+    } else if (maint) {
+      maint.remove();
+      doc.documentElement.classList.remove("is-maint");
+    }
+
+    /* Home hero copy overrides (only when the operator sets a value) */
+    const h = cfg.hero || {};
+    const setTxt = (id, v) => { const el = doc.getElementById(id); if (el && v) el.textContent = v; };
+    setTxt("heroAmount", h.amount);
+    setTxt("heroTitle", h.title);
+    setTxt("heroBody", h.body);
+    const heroCta = doc.getElementById("heroCta");
+    if (heroCta) {
+      if (h.ctaLabel) heroCta.textContent = h.ctaLabel;
+      if (h.ctaHref) heroCta.setAttribute("href", h.ctaHref);
+    }
+
+    /* Contact details */
+    const c = cfg.contact || {};
+    doc.querySelectorAll("[data-contact-email]").forEach((el) => {
+      if (c.email) { el.textContent = c.email; el.setAttribute("href", "mailto:" + c.email); }
+      else el.hidden = true;
+    });
+    doc.querySelectorAll("[data-contact-phone]").forEach((el) => {
+      if (c.phone) el.textContent = c.phone;
+      else el.hidden = true;
+    });
+    doc.querySelectorAll("[data-contact-hours]").forEach((el) => {
+      if (c.hours) el.textContent = c.hours;
+      else el.hidden = true;
+    });
+
+    /* Operator-injected CSS + HTML (full control levers) */
+    let st = doc.getElementById("adminInjectCss");
+    if (cfg.inject.css) {
+      if (!st) { st = doc.createElement("style"); st.id = "adminInjectCss"; doc.head.appendChild(st); }
+      st.textContent = cfg.inject.css;
+    } else if (st) st.remove();
+    let slot = doc.getElementById("adminInjectSlot");
+    if (cfg.inject.html) {
+      if (!slot) {
+        slot = doc.createElement("div");
+        slot.id = "adminInjectSlot";
+        const main = doc.getElementById("main");
+        if (main && main.parentNode) main.parentNode.insertBefore(slot, main);
+        else doc.body.appendChild(slot);
+      }
+      slot.innerHTML = cfg.inject.html;
+    } else if (slot) slot.remove();
+
+    doc.dispatchEvent(new CustomEvent("config:ready", { detail: cfg }));
+  };
+
+  window.SiteConfig.ready = (async () => {
+    try {
+      const res = await fetch("site-config.json", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        siteConfig = deepMerge(DEFAULT_CONFIG, data);
+      }
+    } catch { /* offline or file:// — defaults apply */ }
+    try { applyConfig(); } catch (e) { console.warn("config apply failed", e); }
+    configListeners.forEach((fn) => { try { fn(siteConfig); } catch {} });
+    return siteConfig;
+  })();
+
   /* ---------------- Inject ---------------- */
   const headerSlot = document.getElementById("siteHeaderSlot");
   const footerSlot = document.getElementById("siteFooterSlot");
