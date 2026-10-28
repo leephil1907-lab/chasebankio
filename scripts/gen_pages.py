@@ -6,6 +6,9 @@ verified chase.com structure — no mock account data."""
 import json, os
 
 ROOT = "/home/user/chasebankio"
+# Public origin used in share metadata (og:/twitter:/canonical). Override with
+# SITE_URL env var when the site moves (e.g. a custom domain).
+SITE = (os.environ.get("SITE_URL") or "https://chasebankio.onrender.com").rstrip("/")
 
 TEMPLATE = """<!doctype html>
 <html lang="en" class="no-js">
@@ -21,12 +24,20 @@ TEMPLATE = """<!doctype html>
   <link rel="manifest" href="manifest.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chase">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{desc}">
-  <meta property="og:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
-  <meta property="og:url" content="https://leephil1907-lab.github.io/chasebankio/{file}">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="canonical" href="https://leephil1907-lab.github.io/chasebankio/{file}">
+  <meta property="og:url" content="{site}/{file}">
+  <meta property="og:image" content="{site}/icons/icon-512.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Chase app icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{title}">
+  <meta name="twitter:description" content="{desc}">
+  <meta name="twitter:image" content="{site}/icons/icon-512.png">
+  <link rel="canonical" href="{site}/{file}">
   <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
   <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
@@ -1012,7 +1023,7 @@ def main():
     written = []
     for file, meta in PAGES.items():
         html = TEMPLATE.format(
-            title=meta["title"], desc=meta["desc"], file=file,
+            title=meta["title"], desc=meta["desc"], file=file, site=SITE,
             page_key=meta["page_key"], nav=meta["nav"], body=meta["body"],
         )
         with open(os.path.join(ROOT, file), "w", encoding="utf-8") as f:

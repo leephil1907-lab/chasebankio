@@ -187,7 +187,7 @@ The repo ships a **`render.yaml` Blueprint** (one web service: `npm run build` �
 1. Change the plan to **Starter**, then **Attach → New Disk**: mount path **`/opt/render/project/data`** (exactly the `DATA_DIR` already in `render.yaml` — no env changes needed).
 2. Set `ALLOWED_ORIGINS=https://<your-service>.onrender.com` if you ever see 403s on forms (Origin/Host check; normally Render's Host header already matches).
 3. Optional: add the admin console as a second service, set its public URL in `CONSOLE_URL`, and put it behind access protection; rotate its password before it ever sees the internet.
-4. Optional: custom domain + update `og:`/`canonical` URLs in `scripts/gen_pages.py` and regenerate.
+4. Optional: custom domain — regenerate with `SITE_URL=https://your-domain.tld python3 scripts/gen_pages.py` (share/canonical URLs come from that one constant) and edit the same URLs in `index.html`.
 
 ### Deployment (verified locally — host is your choice)
 `NODE_ENV=production npm start` with the `.env` values → health endpoint green, migrations applied, strict headers. GitHub Pages can host only the static bundle (no database/API) — pick a Node host (Render, Railway, Fly, VPS + systemd) and set the env vars above.
