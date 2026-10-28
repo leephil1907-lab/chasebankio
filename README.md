@@ -169,5 +169,25 @@ Production boot **fails fast** unless `SESSION_SECRET`, `ADMIN_API_TOKEN` and `C
 - Chat never implies a human before handoff; unreachable console ⇒ queued labels.
 - Copy updated everywhere to the new truth: credentials are stored **only on this preview's own server, scrypt-hashed, never sent to Chase**; `noindex` and the single non-affiliation footnote remain.
 
+### Deploying to Render — Free first, then Starter
+
+The repo ships a **`render.yaml` Blueprint** (one web service: `npm run build` → `npm start`).
+
+**Free preview (what you do in the dashboard):**
+1. Push this repo to GitHub, then at <https://dashboard.render.com> → **New → Blueprint** → connect the repo. Render reads `render.yaml` and creates the service with generated secrets — no manual env entry.
+2. Deploy (build runs the validation gate; first boot applies migrations and prints the health URL).
+3. Verify: open the service URL → sign up → dashboard → deposit/transfer; then hit `/api/health` (should show `"status":"ok","nodeEnv":"production"`).
+
+**Free-tier facts (by design, not bugs):**
+- The filesystem is **ephemeral**: the user database lives only while the instance isn't redeployed/restarted/spun down (idle → sleeps after 15 min, wakes in ~1 min). Fine for *looking* at the site — if data resets, just sign up again.
+- No console service yet (`CONSOLE_URL` is empty): support cases are stored and tracked; chat honestly shows its queued/offline labels; password-reset delivery needs the console (add it when you upgrade).
+- One free instance (744 h/month ≈ fits the month). No card charge for the plan itself.
+
+**Upgrade path to Starter (~$7/mo + disk):**
+1. Change the plan to **Starter**, then **Attach → New Disk**: mount path **`/opt/render/project/data`** (exactly the `DATA_DIR` already in `render.yaml` — no env changes needed).
+2. Set `ALLOWED_ORIGINS=https://<your-service>.onrender.com` if you ever see 403s on forms (Origin/Host check; normally Render's Host header already matches).
+3. Optional: add the admin console as a second service, set its public URL in `CONSOLE_URL`, and put it behind access protection; rotate its password before it ever sees the internet.
+4. Optional: custom domain + update `og:`/`canonical` URLs in `scripts/gen_pages.py` and regenerate.
+
 ### Deployment (verified locally — host is your choice)
 `NODE_ENV=production npm start` with the `.env` values → health endpoint green, migrations applied, strict headers. GitHub Pages can host only the static bundle (no database/API) — pick a Node host (Render, Railway, Fly, VPS + systemd) and set the env vars above.

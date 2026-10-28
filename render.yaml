@@ -1,0 +1,30 @@
+# Render Blueprint — chasebankio (full-stack site + API)
+# Import this repo at https://dashboard.render.com → New → Blueprint.
+# Plan: Free to preview (ephemeral disk), then switch to Starter and attach
+# a Persistent Disk at mount path /opt/render/project/data (DATA_DIR already points there).
+services:
+  - type: web
+    name: chasebankio
+    runtime: node
+    plan: free
+    buildCommand: npm run build        # zero-dependency validation gate
+    startCommand: npm start            # node server/index.js — site + API
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true            # rotate anytime; never committed
+      - key: ADMIN_API_TOKEN
+        generateValue: true            # token for the site's admin API (console phase)
+      - key: COOKIE_SECURE
+        value: "1"                     # Render serves HTTPS — Secure cookies required
+      - key: HSTS
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"                     # trust Render's X-Forwarded-For / -Proto
+      - key: FRAME_ANCESTORS
+        value: "'self'"                # strict framing outside the sandbox preview
+      - key: DATA_DIR
+        value: /opt/render/project/data # free: ephemeral · Starter: attach disk HERE
+      - key: CONSOLE_URL
+        value: ""                      # no console service yet — server forwards disabled
