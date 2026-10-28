@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#073b32">
+  <meta name="description" content="Harborline — a responsive banking experience prototype for exploring everyday banking, cards, lending and wealth tools.">
+  <title>Harborline — Everyday banking, made clearer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="demo-banner">DEMO EXPERIENCE · Not a real bank · Never enter real financial credentials</div>
+  <header class="site-header">
+    <div class="topbar wrap">
+      <button class="icon-button menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open navigation"><span class="hamburger"></span></button>
+      <a class="brand" href="#home" aria-label="Harborline home"><span class="brand-mark" aria-hidden="true">h</span><span>harborline</span></a>
+      <nav class="utility-nav" aria-label="Utility navigation">
+        <a href="#support">Support</a><a href="#locations">Locations</a><a href="#wealth">Wealth</a>
+      </nav>
+      <div class="header-actions"><button class="btn btn-outline btn-small" data-route="signin">Sign in</button><button class="btn btn-primary btn-small" data-route="open-account">Open an account</button></div>
+    </div>
+    <nav class="primary-nav" id="primaryNav" aria-label="Main navigation">
+      <div class="wrap nav-inner">
+        <a href="#personal">Personal</a><a href="#business">Business</a><a href="#cards">Credit cards</a><a href="#loans">Loans</a><a href="#wealth">Investing</a><a href="#support">Support</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" id="home">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="live-dot"></span> Banking built around real life</div>
+        <h1>Make room for<br><em>what matters.</em></h1>
+        <p>Simple tools for everyday money, plans for what’s next, and support when you need it.</p>
+        <div class="hero-actions"><button class="btn btn-primary" data-route="open-account">Explore demo accounts <span aria-hidden="true">↗</span></button><a class="text-link" href="#products">Find your fit <span aria-hidden="true">→</span></a></div>
+        <div class="hero-note"><span class="shield">✓</span> Explore safely with fictional demo data.</div>
+      </div>
+      <div class="hero-visual" aria-label="Illustration of a sample banking dashboard">
+        <div class="sun-orb"></div><div class="hero-card back-card"><span class="card-chip"></span><span class="card-lines"></span></div>
+        <div class="hero-card front-card"><div class="mini-brand"><span class="brand-mark">h</span> harborline</div><div class="card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 2048</div><div class="card-bottom"><span>DEMO MEMBER</span><strong>EVERYDAY</strong></div></div>
+        <div class="float-panel"><span class="float-icon">↗</span><div><small>Monthly savings</small><strong>+$240.00</strong></div><span class="float-pill">+8.4%</span></div>
+        <div class="hero-caption">A clearer view of your money.</div>
+      </div>
+    </section>
+
+    <section class="quick-links wrap" aria-label="Popular services">
+      <a href="#business"><span class="quick-icon">▦</span><span>Business</span><b>↗</b></a>
+      <a href="#cards"><span class="quick-icon">▣</span><span>Credit cards</span><b>↗</b></a>
+      <a href="#personal"><span class="quick-icon">◉</span><span>Checking</span><b>↗</b></a>
+      <a href="#personal"><span class="quick-icon">⌁</span><span>Savings</span><b>↗</b></a>
+      <a href="#loans"><span class="quick-icon">⌂</span><span>Home loans</span><b>↗</b></a>
+      <a href="#wealth"><span class="quick-icon">↗</span><span>Investing</span><b>↗</b></a>
+    </section>
+
+    <section class="section section-soft" id="products">
+      <div class="wrap">
+        <div class="section-heading"><div><div class="eyebrow">A good place to start</div><h2>Choose what works<br>for your life.</h2></div><p>From the everyday essentials to your biggest next steps, explore a path that fits your priorities.</p></div>
+        <div class="filter-row" role="group" aria-label="Filter products">
+          <button class="filter-chip active" data-filter="all">All products</button><button class="filter-chip" data-filter="everyday">Everyday</button><button class="filter-chip" data-filter="growth">Grow money</button><button class="filter-chip" data-filter="borrow">Borrow</button>
+        </div>
+        <div class="product-grid" id="productGrid">
+          <article class="product-card product-dark" data-category="everyday"><div class="product-art checking-art"><div class="art-circle"></div><div class="art-card"><span></span><i></i><b></b></div></div><div class="product-content"><span class="card-kicker">EVERYDAY BANKING</span><h3>Checking that keeps up.</h3><p>Manage daily spending with a simple, clear account overview.</p><a href="#personal" class="arrow-link">Explore checking <span>→</span></a></div></article>
+          <article class="product-card" data-category="growth"><div class="product-art savings-art"><div class="savings-orb orb-one"></div><div class="savings-orb orb-two"></div><div class="savings-orb orb-three"></div><span class="art-label">little by little</span></div><div class="product-content"><span class="card-kicker">SAVING</span><h3>Small steps. Big plans.</h3><p>Give your goals a home and see how consistent saving adds up.</p><a href="#personal" class="arrow-link">Explore savings <span>→</span></a></div></article>
+          <article class="product-card" data-category="everyday"><div class="product-art card-art"><div class="floating-bank-card"><span class="tiny-logo">h.</span><span class="tiny-chip"></span><i>•••• 2048</i></div><span class="art-spark spark-a">✳</span><span class="art-spark spark-b">✦</span></div><div class="product-content"><span class="card-kicker">CREDIT CARDS</span><h3>Rewards for your rhythm.</h3><p>Compare fictional card options by everyday value, travel and rewards.</p><a href="#cards" class="arrow-link">Compare cards <span>→</span></a></div></article>
+          <article class="product-card" data-category="borrow"><div class="product-art home-art"><div class="house-shape"><span></span></div><div class="home-sun"></div><div class="home-ground"></div></div><div class="product-content"><span class="card-kicker">HOME & AUTO</span><h3>Move toward your next.</h3><p>Explore borrowing basics and estimate payments before you plan.</p><a href="#loans" class="arrow-link">Explore loans <span>→</span></a></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="personal">
+      <div class="split-feature">
+        <div class="split-visual savings-visual"><div class="visual-ring ring-one"></div><div class="visual-ring ring-two"></div><div class="visual-statement"><small>YOUR GOALS, IN VIEW</small><strong>One step<br>at a time.</strong><span>● ● ●</span></div></div>
+        <div class="split-copy"><div class="eyebrow">Personal banking</div><h2>Money feels better<br>when it’s in view.</h2><p>Keep the day-to-day moving and make a little space for the future. This prototype brings checking, saving and planning into one simple experience.</p><ul class="check-list"><li>See everyday and savings account concepts</li><li>Explore sample balances and activity</li><li>Try planning tools with fictional numbers</li></ul><button class="btn btn-primary" data-route="dashboard">Explore sample dashboard <span>→</span></button></div>
+      </div>
+    </section>
+
+    <section class="section cards-section" id="cards">
+      <div class="wrap">
+        <div class="section-heading"><div><div class="eyebrow">Find your kind of card</div><h2>Made for the way<br>you spend.</h2></div><p>Compare illustrative card concepts. Terms, rates and rewards below are sample content only.</p></div>
+        <div class="filter-row" role="group" aria-label="Filter sample cards"><button class="filter-chip active" data-card-filter="all">All cards</button><button class="filter-chip" data-card-filter="cashback">Cash back</button><button class="filter-chip" data-card-filter="travel">Travel</button><button class="filter-chip" data-card-filter="business">Business</button></div>
+        <div class="card-options">
+          <article class="credit-option" data-card-type="cashback"><div class="credit-visual credit-green"><div class="credit-top"><span>harborline</span><span>VISA</span></div><div class="credit-chip"></div><div class="credit-bottom"><span>EVERYDAY REWARDS</span><b>•••• 4820</b></div></div><div class="credit-info"><span class="tag">CASH BACK</span><h3>Everyday Rewards</h3><p>Simple rewards on routine purchases.</p><div class="metric-row"><div><strong>1.5%</strong><small>sample base rewards</small></div><div><strong>$0</strong><small>sample annual fee</small></div></div><button class="btn btn-outline full-width" data-card-details="Everyday Rewards">View sample details</button></div></article>
+          <article class="credit-option" data-card-type="travel"><div class="credit-visual credit-blue"><div class="credit-top"><span>harborline</span><span>VISA</span></div><div class="travel-lines"></div><div class="credit-bottom"><span>TRAVEL PLUS</span><b>•••• 9164</b></div></div><div class="credit-info"><span class="tag">TRAVEL</span><h3>Travel Plus</h3><p>Illustrative benefits for your next journey.</p><div class="metric-row"><div><strong>2×</strong><small>sample travel points</small></div><div><strong>$75</strong><small>sample annual fee</small></div></div><button class="btn btn-outline full-width" data-card-details="Travel Plus">View sample details</button></div></article>
+          <article class="credit-option" data-card-type="business"><div class="credit-visual credit-sand"><div class="credit-top"><span>harborline</span><span>VISA</span></div><div class="business-lines"></div><div class="credit-bottom"><span>BUSINESS FLEX</span><b>•••• 3312</b></div></div><div class="credit-info"><span class="tag">BUSINESS</span><h3>Business Flex</h3><p>Keep business purchases organized.</p><div class="metric-row"><div><strong>2%</strong><small>sample select-category</small></div><div><strong>$0</strong><small>sample annual fee</small></div></div><button class="btn btn-outline full-width" data-card-details="Business Flex">View sample details</button></div></article>
+        </div>
+        <p class="disclaimer">Illustrative product examples only. These are not real offers or terms and cannot be used to apply for a financial product.</p>
+      </div>
+    </section>
+
+    <section class="section business-section" id="business">
+      <div class="wrap business-layout">
+        <div class="business-copy"><div class="eyebrow">For the builders</div><h2>Your business has<br>places to go.</h2><p>Spend less time sorting through options and more time on what you’re building. Choose your focus to see a suggested starting point.</p><div class="business-selector" role="group" aria-label="What does your business need?"><button class="need-option active" data-need="startup"><span>01</span> Starting out <b>↗</b></button><button class="need-option" data-need="payments"><span>02</span> Accepting payments <b>↗</b></button><button class="need-option" data-need="credit"><span>03</span> Access to credit <b>↗</b></button><button class="need-option" data-need="all"><span>04</span> A bit of everything <b>↗</b></button></div></div>
+        <div class="business-result" aria-live="polite"><div class="result-icon">↗</div><span class="card-kicker">YOUR SUGGESTED START</span><h3 id="businessResultTitle">Build a strong foundation.</h3><p id="businessResultText">Start with a business account concept, separate your business activity and create a clearer view of cash flow.</p><ul id="businessResultList"><li>Business checking overview</li><li>Cash-flow planning basics</li><li>Tools to organize expenses</li></ul><a href="#support" class="arrow-link">Explore business resources <span>→</span></a></div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="loans">
+      <div class="loan-panel"><div class="loan-copy"><div class="eyebrow">Plan with a little more clarity</div><h2>Bring the numbers<br>into focus.</h2><p>Try this simple payment estimator to understand how loan amount, interest and time can affect a monthly payment.</p><div class="loan-note">For illustration only — not an offer, quote or loan approval.</div></div>
+        <form class="calculator" id="loanCalculator"><div class="calc-heading"><span>MONTHLY PAYMENT ESTIMATOR</span><span class="calc-badge">DEMO TOOL</span></div>
+          <label for="loanAmount">Loan amount <strong id="amountOutput">$25,000</strong></label><input id="loanAmount" type="range" min="1000" max="100000" step="500" value="25000">
+          <div class="calc-row"><label for="loanApr">Annual interest rate (%)</label><input id="loanApr" type="number" min="0" max="35" step=".1" value="6.5"></div>
+          <div class="calc-row"><label for="loanTerm">Loan term</label><select id="loanTerm"><option value="24">2 years</option><option value="36">3 years</option><option value="48" selected>4 years</option><option value="60">5 years</option><option value="84">7 years</option><option value="120">10 years</option><option value="240">20 years</option><option value="360">30 years</option></select></div>
+          <div class="payment-result"><small>ESTIMATED MONTHLY PAYMENT</small><strong id="monthlyPayment">$593.19</strong><span id="paymentSummary">48 monthly payments · before taxes and fees</span></div><button type="submit" class="btn btn-primary full-width">Update estimate <span>↗</span></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section wealth-section" id="wealth">
+      <div class="wrap wealth-layout"><div class="wealth-art"><div class="wealth-disc"></div><div class="wealth-arc"></div><div class="wealth-label">A LONGER VIEW <span>↗</span></div></div><div class="wealth-copy"><div class="eyebrow">Wealth & investing</div><h2>Think beyond<br>the next payday.</h2><p>Explore investing concepts, set a goal and learn how different time horizons can shape a plan. The demo does not connect to markets or hold assets.</p><a class="arrow-link" href="#support">Explore learning resources <span>→</span></a><p class="disclaimer">Investing involves risk, including possible loss of principal. This demo does not provide investment advice.</p></div></div>
+    </section>
+
+    <section class="section support-section" id="support"><div class="wrap"><div class="section-heading"><div><div class="eyebrow">Here when you need us</div><h2>Good questions<br>deserve clear answers.</h2></div><p>Find helpful starting points for account access, safety and everyday money questions.</p></div><div class="support-grid"><a href="#signin" class="support-card"><span>↗</span><h3>Account access</h3><p>Explore the demo sign-in and sample dashboard.</p><b>Go to sign in →</b></a><a href="#security" class="support-card"><span>◇</span><h3>Security center</h3><p>Learn the basics of protecting your personal information.</p><b>Safety checklist →</b></a><a href="#faq" class="support-card"><span>?</span><h3>Common questions</h3><p>Understand what this prototype can and cannot do.</p><b>Read FAQs →</b></a></div></div></section>
+
+    <section class="section wrap" id="security"><div class="security-strip"><div class="security-icon">◇</div><div><div class="eyebrow">Your information matters</div><h2>Explore the demo. Keep your real details private.</h2><p>This prototype uses sample data and does not connect to a bank. Do not enter real passwords, account numbers or personal financial information.</p></div><a href="#faq" class="arrow-link">Read safety notes <span>→</span></a></div></section>
+
+    <section class="section wrap faq-section" id="faq"><div class="section-heading"><div><div class="eyebrow">Before you explore</div><h2>Frequently asked<br>questions.</h2></div></div><details><summary>Is Harborline a real bank?</summary><p>No. Harborline is a fictional brand used for a front-end banking experience prototype. It is not affiliated with Chase or JPMorgan Chase.</p></details><details><summary>Does sign-in use real authentication?</summary><p>No. The sign-in and dashboard are a demonstration flow using fictional sample data. Never enter a real password or sensitive financial information.</p></details><details><summary>Can I open an actual account or apply for a card?</summary><p>No. Forms only demonstrate user-interface behavior and do not submit applications, check eligibility or create financial accounts.</p></details></section>
+  </main>
+
+  <footer class="site-footer" id="locations"><div class="wrap footer-top"><div class="footer-brand"><a class="brand brand-light" href="#home"><span class="brand-mark">h</span><span>harborline</span></a><p>A clearer way to explore your money.<br>Designed as a banking UI prototype.</p><span class="demo-stamp">FICTIONAL DEMO BRAND</span></div><div class="footer-column"><h3>Explore</h3><a href="#personal">Personal banking</a><a href="#business">Business</a><a href="#cards">Credit cards</a><a href="#loans">Loans</a></div><div class="footer-column"><h3>Plan ahead</h3><a href="#wealth">Investing education</a><a href="#products">Savings goals</a><a href="#loans">Payment estimator</a></div><div class="footer-column"><h3>Help & safety</h3><a href="#support">Support</a><a href="#security">Security center</a><a href="#faq">FAQs</a><button class="footer-link" data-route="signin">Demo sign in</button></div></div><div class="wrap footer-bottom"><span>© 2026 Harborline Demo. Fictional product and sample data.</span><div><a href="#faq">Privacy note</a><a href="#faq">Accessibility</a><a href="#faq">Terms</a></div><span class="fdic-note">Not a financial institution · No deposits accepted</span></div></footer>
+
+  <dialog id="demoDialog" class="demo-dialog"><button class="dialog-close" id="dialogClose" aria-label="Close dialog">×</button><div id="dialogContent"></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
