@@ -239,6 +239,30 @@ const cookieOf = (res) => String(res.headers["set-cookie"] || "").split(";")[0];
   eq(res.status, 200, "admin stats");
   check(res.data.users >= 1 && res.data.txns >= 5, "stats counts populated");
 
+  /* manual balance control: top-up, set-to, validation, authz */
+  const balAcct = aliceRow.accounts.find((a) => a.type === "checking");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: balAcct.id, mode: "credit", amount: "12.34", reason: "QA top-up" } });
+  eq(res.status, 200, "admin top-up accepted");
+  eq(res.data.account.balanceCents, balAcct.balanceCents + 1234, "top-up added to balance");
+  eq(res.data.transaction.amountCents, 1234, "top-up ledgered signed");
+  eq(res.data.transaction.type, "adjustment", "top-up is an adjustment txn");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: balAcct.id, mode: "set", amount: "5.00", reason: "QA set" } });
+  eq(res.status, 200, "admin set-balance accepted");
+  eq(res.data.account.balanceCents, 500, "set-balance applied");
+  eq(res.data.transaction.amountCents, 500 - (balAcct.balanceCents + 1234), "set delta ledgered");
+  res = await R("GET", "/api/accounts", { cookie: aliceCookie });
+  eq(res.data.accounts.find((a) => a.id === balAcct.id).balanceCents, 500, "user sees adjusted balance");
+  res = await R("GET", "/api/transactions?limit=50", { cookie: aliceCookie });
+  check(res.data.transactions.some((t) => t.type === "adjustment" && /adjusted|top-up/.test(t.label)), "adjustment visible in user activity");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: balAcct.id, mode: "teleport", amount: "1" } });
+  eq(res.status, 400, "invalid mode rejected");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: balAcct.id, mode: "set", amount: "5.00" } });
+  eq(res.status, 400, "no-change adjustment rejected");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { body: { accountId: balAcct.id, mode: "credit", amount: "1" } });
+  eq(res.status, 401, "balance endpoint token-gated");
+  res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: "ac_none", mode: "credit", amount: "1" } });
+  eq(res.status, 404, "unknown account rejected");
+
   res = await R("PATCH", `/api/admin/cases/${aliceCase.id}`, { headers: { "x-admin-token": cfg.adminToken }, body: { message: "Your statement lives in Account hub → Activity.", status: "pending" } });
   eq(res.status, 200, "admin replies to case");
   res = await R("GET", "/api/support", { cookie: aliceCookie });

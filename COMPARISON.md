@@ -120,7 +120,7 @@ Brand `#005EB8` · action `#0060F0` · green `#138842` · ink `#131313` · secon
 | Payments with payees, scheduling and status tracking (completed/failed/cancelled) | Requested: "Payments … transaction-status tracking" |
 | Server hardening: authz, rate limiting, validation, security headers/CSP/CSRF | Requested: "Security …" |
 | Support cases with IDs, statuses, message history + console case management | Requested: "Customer support … case tracking and message history" |
-| Console user management (suspend/delete/reset) + DB stats + site health | Requested: "Administration … user management and audit logs" |
+| Console user management (suspend/delete/reset, **manual balance top-up & set-to**) + DB stats + site health | Requested: "Administration … user management and audit logs" |
 | Repo test suites + deployment verification (env fail-fast, prod boot, health) | Requested: "Testing … deployment verification" and "Deployment … environment-variable checks and health monitoring" |
 | New page: `reset-password.html`; 16 → 17 pages | Supports password reset end-to-end |
 

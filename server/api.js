@@ -610,13 +610,50 @@ on("GET", "/api/admin/users", needAdmin((ctx) => {
     return {
       id: u.id, username: u.username, name: u.name, email: u.email,
       status: u.status, createdAt: u.createdAt, lastLoginAt: u.lastLoginAt,
-      accounts: accts.map((a) => ({ type: a.type, name: a.name, last4: a.last4, balanceCents: a.balanceCents, status: a.status })),
+      accounts: accts.map((a) => ({ id: a.id, type: a.type, name: a.name, last4: a.last4, balanceCents: a.balanceCents, status: a.status })),
       totalBalanceCents: accts.reduce((n, a) => n + a.balanceCents, 0),
       txnCount: txns.length,
       cases: db.coll("cases").filter((c) => c.userId === u.id).length,
     };
   }).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   json(ctx.res, 200, { users });
+}));
+
+/* =================== ADMIN: manual balance control =================== */
+/* Operator top-up (credit) or set-to-value. Money stays integer cents,
+   always ledgered as a signed "adjustment" transaction + audit entry. */
+on("POST", "/api/admin/users/:id/balance", needAdmin((ctx) => {
+  const db = ctx.db;
+  const user = db.coll("users").find((u) => u.id === ctx.params.id);
+  if (!user) return err(ctx.res, 404, "no_user", "User not found.");
+  const b = V.pick(ctx.body || {}, ["accountId", "mode", "amount", "reason"]);
+  const acct = db.coll("accounts").find((a) => a.id === b.accountId && a.userId === user.id);
+  if (!acct) return err(ctx.res, 404, "no_account", "That account does not belong to this user.");
+  if (acct.status !== "open") return err(ctx.res, 409, "account_closed", "This account is not open.");
+  const mode = String(b.mode || "");
+  if (mode !== "credit" && mode !== "set") throw V.badRequest("mode must be credit or set.");
+  const amountCents = V.cents(b.amount, { name: "Amount", min: 1, maxCents: 100000000 });
+  const reason = b.reason ? V.str(b.reason, { max: 120, name: "Reason" }) : "Manual adjustment";
+  const prev = acct.balanceCents;
+  const next = mode === "credit" ? prev + amountCents : amountCents;
+  if (next < 0) return err(ctx.res, 400, "negative_balance", "Balance cannot go below $0.00.");
+  if (next === prev) return err(ctx.res, 400, "no_change", "That account is already at that amount.");
+  acct.balanceCents = next;
+  const txn = {
+    id: uid("t"), userId: user.id, accountId: acct.id,
+    ts: new Date().toISOString(), type: "adjustment", status: "completed",
+    label: mode === "credit" ? "Operator top-up" : "Balance adjusted by operator",
+    memo: reason,
+    amountCents: next - prev, balanceAfterCents: next, counterparty: "Operator",
+  };
+  db.coll("txns").push(txn);
+  db.save();
+  audit(db, ctx, {
+    actorType: "admin", actorName: "operator-console",
+    action: "admin.balance", target: `${user.username}/${acct.id}`,
+    detail: `${mode} ${((next - prev) / 100).toFixed(2)} (${(prev / 100).toFixed(2)} → ${(next / 100).toFixed(2)}) · ${reason}`,
+  });
+  json(ctx.res, 200, { account: acctPublic(acct), transaction: txn });
 }));
 
 on("PATCH", "/api/admin/users/:id", needAdmin((ctx) => {
