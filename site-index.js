@@ -89,5 +89,11 @@ window.SITE_INDEX = [
   "title": "My account hub",
   "desc": "Signed-in dashboard with quick actions and profile status.",
   "kw": "account dashboard session welcome"
+ },
+ {
+  "url": "reset-password.html",
+  "title": "Reset password",
+  "desc": "Request a time-limited reset link and choose a new password.",
+  "kw": "reset password forgot recovery forgot-password"
  }
 ];

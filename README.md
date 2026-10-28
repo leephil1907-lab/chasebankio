@@ -137,3 +137,37 @@ See `chase-admin/README.md` for run instructions.
 - **Logo fit:** header logo exactly centered on mobile/tablet (`grid 1fr auto 1fr`), anchored left on desktop, rendered 126×24 with no distortion.
 - **Honesty copy:** the account ribbon states credentials never leave the browser and that usage events reach only the operator's local console.
 - **Evidence:** `phase4` QA (23 checks: console users/activity, avatar, overlap, logo, veil, Español) + full e2e/crawl/offline suites green.
+
+
+## Phase 5 — full-stack: real auth, database, ledger, payments & hardening (latest)
+
+The static replica now runs as a **full-stack application**: one zero-dependency Node server serves the site **and** a JSON-backed database with real authentication, a money ledger, support case tracking and a hardened API.
+
+### Running it
+```bash
+npm start            # site + API on :8123 (dev defaults, prints health URL)
+npm run migrate      # apply pending database migrations (idempotent)
+npm test             # validate + 98 API checks + 14 deployment checks
+cp .env.example .env # production values — see comments in the file
+```
+Production boot **fails fast** unless `SESSION_SECRET`, `ADMIN_API_TOKEN` and `COOKIE_SECURE=1` are set; `FRAME_ANCESTORS`, `HSTS`, `TRUST_PROXY` and `ALLOWED_ORIGINS` are documented in `.env.example`. `GET /api/health` reports uptime, schema version and applied migrations.
+
+### What is real now
+- **Authentication** — registration, sign-in, logout, password reset (time-limited single-use tokens), change-password. Passwords hashed with **scrypt** (N=16384, per-user salt, constant-time compare); sessions are random 256-bit tokens stored **hashed**, in `HttpOnly; SameSite=Lax` cookies (Secure in production), sliding expiry, revocation on password change/suspension.
+- **Database** (`data/db.json`, git-ignored) — profiles, accounts, transactions (integer cents), payees, payments, sessions, reset tokens, support cases, audit trail, settings. Migration runner in `migrations/`.
+- **Dashboard** — account overview with real balances, masked numbers, recent activity with running balances, account details. Accounts open at **$0.00**; a clearly-labelled demo deposit flow creates funds through genuine usage (locked decision: no invented balances).
+- **Transfers** — validated (own accounts, balance, $2,500 single / $5,000 daily caps), **step-up password authorization** on every transfer, double-entry ledger rows, audit-logged attempts including failures.
+- **Payments** — payee management, immediate or scheduled payments, statuses `scheduled → completed | failed | cancelled`, lazy + interval processing of due payments, failure rows preserved for tracking.
+- **Customer support** — case IDs (`CS-####`), status lifecycle `open → pending → resolved/closed`, full message history visible to the customer in their hub; the operator console replies and changes status (console proxies the site's token-protected admin API — the site DB stays single-writer).
+- **Administration** — console `Users` tab manages real accounts (suspend/reactivate with session revocation, delete with cascade, issue reset links); `Support cases` tab threads/replies/status; dashboard shows DB stats + site-backend health. Console audit log records every management action.
+- **Security** — server-side authorization on every route; CSRF posture (SameSite + Origin check + required `X-Requested-With` on mutations); per-route rate limits (login/register/forgot/transfers); strict input validation (lengths, formats, integer-cents money, whitelist bodies); security headers incl. dynamic-hash **CSP** (inline boot script hashed per page), nosniff, COOP/CORP, referrer/permissions policies, `frame-ancestors` (env-controlled — `*` for the sandbox preview, `'self'` example for production), optional HSTS; JSON bodies capped at 64 KB; traversal-proof static serving.
+- **Navigation & forms** — crawl-verified menus/drawer/search/404 across 4 viewports; every form validates client- **and** server-side with loading states, error messages and success confirmations.
+- **Testing** — `tests/api.test.js` (98 checks: auth flows, ledger integrity, limits, payments, cases, admin authz, headers, CSRF, rate limits, audit) and `tests/deploy.test.js` (env fail-fast, idempotent migrations, prod-mode boot with Secure cookies + HSTS + pinned frame-ancestors, health, 404). Browser suites: multi-page crawl, 20-check e2e, offline-queue, motion/branding (phase 4) and the 34-check full journey (`phase5`).
+
+### Honesty rules carried forward (updated, not dropped)
+- Never claim a send that didn't occur; reset links are honestly delivered via the operator console (no email service is pretended).
+- Chat never implies a human before handoff; unreachable console ⇒ queued labels.
+- Copy updated everywhere to the new truth: credentials are stored **only on this preview's own server, scrypt-hashed, never sent to Chase**; `noindex` and the single non-affiliation footnote remain.
+
+### Deployment (verified locally — host is your choice)
+`NODE_ENV=production npm start` with the `.env` values → health endpoint green, migrations applied, strict headers. GitHub Pages can host only the static bundle (no database/API) — pick a Node host (Render, Railway, Fly, VPS + systemd) and set the env vars above.

@@ -109,6 +109,21 @@ Brand `#005EB8` · action `#0060F0` · green `#138842` · ink `#131313` · secon
 | Route veil, staggered entrances, micro-interactions | Requested motion-driven feel with smooth route flow; reduced-motion safe, content always ends visible |
 | Exact mobile logo centering / desktop anchoring | Requested pixel-perfect logo fit on both breakpoints |
 
+### 9.5 Phase 5 (full-stack application)
+
+| Add-on | Why |
+|---|---|
+| Real registration/sign-in/reset with scrypt hashing + server sessions | Requested: "Real registration, sign-in, password hashing, secure sessions, password reset" |
+| Persistent JSON database (profiles, accounts, transactions, cases, audit) + migration runner | Requested: "Database … transaction history and settings … database migrations" |
+| Working dashboard with balances, recent activity, account details (accounts open at $0.00 + real deposit flow) | Requested: "Dashboard … balances, recent activity" while keeping the no-invented-money rule |
+| Transfers with step-up authorization, daily/single limits, double-entry audit trail | Requested: "Transfers … authorization, limits and audit trails" |
+| Payments with payees, scheduling and status tracking (completed/failed/cancelled) | Requested: "Payments … transaction-status tracking" |
+| Server hardening: authz, rate limiting, validation, security headers/CSP/CSRF | Requested: "Security …" |
+| Support cases with IDs, statuses, message history + console case management | Requested: "Customer support … case tracking and message history" |
+| Console user management (suspend/delete/reset) + DB stats + site health | Requested: "Administration … user management and audit logs" |
+| Repo test suites + deployment verification (env fail-fast, prod boot, health) | Requested: "Testing … deployment verification" and "Deployment … environment-variable checks and health monitoring" |
+| New page: `reset-password.html`; 16 → 17 pages | Supports password reset end-to-end |
+
 ## 10. Known deviations (intentional, documented)
 
 1. **Noindex + `robots.txt` Disallow** — standing rule for the demo.
@@ -116,3 +131,8 @@ Brand `#005EB8` · action `#0060F0` · green `#138842` · ink `#131313` · secon
 3. **External links** are used only for verified real chase.com resources (rates, calculators, locator, Zelle, Español, secure sign-in token page) — everything else is local-first.
 4. **Account dashboard shows placeholders instead of balances** — no mock data allowed; sign-in success is a browser-local session and is never claimed to contact Chase.
 5. **Admin control panel, live chat and email notification** are explicitly *out of scope* for this phase and, per standing rule, the admin page must be built outside this repository.
+
+### Phase-5 deviations (explicitly requested this phase)
+- **Sign-in is no longer browser-local only.** Earlier phases locked "credentials never transmit" to prevent any deceptive auth; the phase-5 request explicitly reversed this for *this demo's own backend*. Credentials now go **same-origin to the preview server only**, are scrypt-hashed, and are never sent to Chase or any third party — all copy, the account ribbon and the footer footnote were rewritten to say exactly that. `noindex`, the single non-affiliation line and "no email is ever claimed" remain.
+- **Balances exist** (they were previously placeholder-free by rule). New accounts still open at $0.00; money only enters through the user-driven demo deposit flow — no seeded or invented figures.
+- **GitHub Pages cannot host this build** (no server/database); production mode is configured and verified locally, hosting documented in README.

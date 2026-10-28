@@ -6,14 +6,14 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#005EB8">
   <title>Secure Sign In | Chase Online</title>
-  <meta name="description" content="Sign in to Chase online banking — or choose passwordless sign-in. Your credentials stay on this device in this design preview.">
+  <meta name="description" content="Sign in to Chase online banking — or choose passwordless sign-in. Credentials are stored only on this preview’s local server (scrypt-hashed) and never sent to Chase.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chase">
   <meta property="og:title" content="Secure Sign In | Chase Online">
-  <meta property="og:description" content="Sign in to Chase online banking — or choose passwordless sign-in. Your credentials stay on this device in this design preview.">
+  <meta property="og:description" content="Sign in to Chase online banking — or choose passwordless sign-in. Credentials are stored only on this preview’s local server (scrypt-hashed) and never sent to Chase.">
   <meta property="og:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
   <meta property="og:url" content="https://leephil1907-lab.github.io/chasebankio/sign-in.html">
   <meta name="twitter:card" content="summary_large_image">
@@ -44,7 +44,7 @@
         <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Sign in</span></nav>
         <p class="eyebrow">Sign in</p>
         <h1>Welcome back to Chase</h1>
-        <p class="lede">Sign in to view accounts, move money and manage cards &mdash; this design preview keeps everything on your device.</p>
+        <p class="lede">Sign in to view accounts, move money and manage cards &mdash; your credentials are hashed (scrypt) on this preview’s own local server and never sent to Chase.</p>
       </div>
     </section>
 
@@ -74,7 +74,7 @@
             <div class="or-divider" role="separator"><span>Or</span></div>
             <button class="btn btn-outline btn-block" type="button" id="pgPasswordless">Passwordless sign in</button>
             <div class="signin-links">
-              <a id="help" href="#help">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+              <a id="help" href="reset-password.html">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
               <a href="sign-up.html">Not Enrolled? Sign Up Now. <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
             </div>
           </form>
@@ -82,7 +82,7 @@
         <aside class="auth-side">
           <h2>First time signing in here?</h2>
           <ul>
-            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your username and password never leave this device in this preview.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your credentials are hashed on this preview’s own server &mdash; never sent to Chase or any third party.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Enroll in under five minutes with your account details.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Set a reminder and we'll remember your username on this browser.</span></li>
           </ul>

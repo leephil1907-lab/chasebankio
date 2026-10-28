@@ -2,18 +2,23 @@
   "name": "chasebankio",
   "version": "1.0.0",
   "private": true,
-  "description": "Reference-matched front-end recreation of the Chase.com homepage — static HTML/CSS/JS with real reference SVG assets, self-hosted Open Sans, complete metadata and a zero-dependency build validation.",
+  "description": "Full-stack recreation of the Chase.com experience \u2014 reference-matched front-end plus a zero-dependency Node backend: real registration, scrypt-hashed credentials, server sessions, a persistent ledger database, transfers, payments, support cases and hardened API security.",
   "scripts": {
     "build": "node scripts/validate.js",
-    "test": "node scripts/validate.js",
-    "serve": "python3 -m http.server 8080"
+    "start": "node server/index.js",
+    "migrate": "node scripts/migrate.js",
+    "test": "node scripts/validate.js && node tests/api.test.js && node tests/deploy.test.js",
+    "test:api": "node tests/api.test.js",
+    "test:deploy": "node tests/deploy.test.js",
+    "serve": "node server/index.js"
   },
   "keywords": [
     "chase",
     "banking",
-    "landing-page",
-    "static-site",
-    "front-end"
+    "full-stack",
+    "auth",
+    "ledger",
+    "node"
   ],
   "license": "UNLICENSED"
 }

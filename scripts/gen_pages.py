@@ -588,10 +588,10 @@ PAGES["support.html"] = dict(
 PAGES["sign-in.html"] = dict(
     page_key="signin", nav="personal",
     title="Secure Sign In | Chase Online",
-    desc="Sign in to Chase online banking — or choose passwordless sign-in. Your credentials stay on this device in this design preview.",
+    desc="Sign in to Chase online banking — or choose passwordless sign-in. Credentials are stored only on this preview’s local server (scrypt-hashed) and never sent to Chase.",
     body="\n\n".join([
         hero("Sign in", "Welcome back to Chase",
-             "Sign in to view accounts, move money and manage cards &mdash; this design preview keeps everything on your device."),
+             "Sign in to view accounts, move money and manage cards &mdash; your credentials are hashed (scrypt) on this preview’s own local server and never sent to Chase."),
         f"""    <section class="section">
       <div class="wrap auth-wrap">
         <div class="auth-card" id="signinPageCard" role="region" aria-label="Sign in form">
@@ -618,7 +618,7 @@ PAGES["sign-in.html"] = dict(
             <div class="or-divider" role="separator"><span>Or</span></div>
             <button class="btn btn-outline btn-block" type="button" id="pgPasswordless">Passwordless sign in</button>
             <div class="signin-links">
-              <a id="help" href="#help">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+              <a id="help" href="reset-password.html">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
               <a href="sign-up.html">Not Enrolled? Sign Up Now. <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
             </div>
           </form>
@@ -626,7 +626,7 @@ PAGES["sign-in.html"] = dict(
         <aside class="auth-side">
           <h2>First time signing in here?</h2>
           <ul>
-            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your username and password never leave this device in this preview.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your credentials are hashed on this preview’s own server &mdash; never sent to Chase or any third party.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Enroll in under five minutes with your account details.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Set a reminder and we'll remember your username on this browser.</span></li>
           </ul>
@@ -644,10 +644,10 @@ PAGES["sign-in.html"] = dict(
 PAGES["sign-up.html"] = dict(
     page_key="signup", nav="personal",
     title="Enroll in Chase Online | Sign Up",
-    desc="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements. This preview keeps your data on this device.",
+    desc="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements. Details are stored only in this preview’s local database.",
     body="\n\n".join([
         hero("Sign up", "Create your Chase profile",
-             "Three short steps. Everything you enter stays in this browser &mdash; nothing is transmitted anywhere."),
+             "Three short steps. Everything you enter stays in this preview’s local database &mdash; never sent to Chase."),
         """    <section class="section">
       <div class="wrap">
         <div class="auth-card" style="max-width:640px">
@@ -691,16 +691,17 @@ PAGES["sign-up.html"] = dict(
               <p class="sub">Review and accept to finish enrolling.</p>
               <label class="field-check terms-box">
                 <input type="checkbox" id="suTerms">
-                <span>I agree to the Chase Online Services Agreement, Privacy Policy and to receive account notices electronically. <em>This is a design preview &mdash; no real account or credit product is opened, and nothing you type is transmitted.</em></span>
+                <span>I agree to the Chase Online Services Agreement, Privacy Policy and to receive account notices electronically. <em>This is a design preview &mdash; no real account or credit product is opened, and your details stay in this preview’s local database, never sent to Chase.</em></span>
                 <span class="field-error"></span>
               </label>
+              <div class="signin-status" id="suNotice" role="status" hidden></div>
               <div class="step-actions"><button class="link-quiet" type="button" data-step-back>Back</button><button class="btn btn-blue" type="button" id="suFinish">Create account</button></div>
             </div>
 
             <div class="su-step success-panel" id="suSuccess" hidden>
               <div class="success-badge"><svg aria-hidden="true"><use href="#ic-check"/></svg></div>
               <h2>You're enrolled!</h2>
-              <p>Your local profile is ready. Sign in anytime from this browser to open your account hub.</p>
+              <p>Your profile is ready and you are signed in. Open your account hub to see your accounts and get started.</p>
               <a class="btn btn-blue" href="account.html">Go to my account</a>
             </div>
           </div>
@@ -714,59 +715,173 @@ PAGES["sign-up.html"] = dict(
 PAGES["account.html"] = dict(
     page_key="account", nav="personal",
     title="My Account | Chase",
-    desc="Your signed-in account hub — profile, session status and quick links to money movement tools (design preview, local session only).",
-    body="\n\n".join([
-        """    <div class="demo-ribbon">Design preview &mdash; your session lives only in this browser tab. No bank data and no real accounts; credentials never leave your browser &mdash; usage events reach only the site operator&rsquo;s local console.</div>
+    desc="Your account hub — balances, activity, transfers, payments, support cases and settings for this design preview (data stored locally).",
+    body="""    <div class="demo-ribbon">Design preview &mdash; not affiliated with JPMorgan Chase. Your accounts, balances and history live only in this preview&rsquo;s local database; passwords are scrypt-hashed and never sent to Chase.</div>
     <section class="section">
       <div class="wrap">
         <div class="account-head">
           <div>
             <h1 data-greeting>Welcome back</h1>
             <p class="sub">Signed in as <strong data-username-badge></strong> &middot; <span data-email-badge></span></p>
+            <p class="acct-meta" id="relLine">Loading account summary&hellip;</p>
           </div>
           <div class="acct-actions">
-            <button class="btn btn-outline" type="button" data-demo-action="Profile settings are part of the connected Chase experience in the full product.">Profile settings</button>
-            <button class="btn btn-blue" type="button" data-demo-action="Statements appear here once an account is linked in the full product.">Statements</button>
+            <a class="btn btn-outline" href="support.html">Support</a>
+            <button class="btn btn-blue" type="button" id="acctSignout">Sign out</button>
           </div>
         </div>
-        <div class="acct-grid">
-          <div class="acct-card">
-            <span class="sample-tag">Preview</span>
-            <span class="acct-label">Checking</span>
-            <span class="acct-balance">&mdash;&mdash;&mdash;</span>
-            <span class="acct-meta">Balance available after linking an account</span>
-            <div class="acct-actions"><button class="btn btn-outline" type="button" data-demo-action="Link a Chase account in the full product to see your real balance.">Link account</button></div>
+        <div class="acct-grid" id="acctGrid" aria-live="polite" aria-busy="true">
+          <div class="acct-card"><span class="acct-label">Loading accounts&hellip;</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="activityTitle" id="activity">
+      <div class="wrap">
+        <div class="section-head-row">
+          <div>
+            <h2 class="section-title" id="activityTitle">Recent activity</h2>
+            <p class="section-lede">Every deposit, transfer and payment on your accounts, newest first.</p>
           </div>
-          <div class="acct-card">
-            <span class="sample-tag">Preview</span>
-            <span class="acct-label">Savings</span>
-            <span class="acct-balance">&mdash;&mdash;&mdash;</span>
-            <span class="acct-meta">Balance available after linking an account</span>
-            <div class="acct-actions"><button class="btn btn-outline" type="button" data-demo-action="Link a Chase account in the full product to see your real balance.">Link account</button></div>
+          <button class="btn btn-outline btn-small" type="button" id="txnsMore" hidden>Show all</button>
+        </div>
+        <div class="txn-list" id="txnsList" aria-live="polite">
+          <p class="muted">Loading activity&hellip;</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="moneyTitle" id="money">
+      <div class="wrap">
+        <h2 class="section-title" id="moneyTitle">Move money</h2>
+        <p class="section-lede">Validated end-to-end by the server — every action is authorized, limited and audit-logged.</p>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h3>Deposit <span class="dash-tag">demo funding</span></h3>
+            <p class="dash-sub">Add external (demo) funds to one of your accounts. Accounts start at $0.00.</p>
+            <form id="depForm" novalidate>
+              <div class="field"><label for="depAccount">To account</label><select id="depAccount" required></select></div>
+              <div class="field"><label for="depAmount">Amount (USD)</label><input id="depAmount" type="text" inputmode="decimal" placeholder="250.00" maxlength="12" autocomplete="off"><span class="field-error"></span></div>
+              <div class="field"><label for="depMemo">Memo <span class="opt">(optional)</span></label><input id="depMemo" type="text" maxlength="120" placeholder="Paycheck, gift, opening deposit…"></div>
+              <div class="form-status" id="depStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Add deposit</button>
+            </form>
           </div>
-          <div class="acct-card">
-            <span class="sample-tag">Preview</span>
-            <span class="acct-label">Credit cards</span>
-            <span class="acct-balance">&mdash;&mdash;&mdash;</span>
-            <span class="acct-meta">Available credit after linking a card</span>
-            <div class="acct-actions"><button class="btn btn-outline" type="button" data-demo-action="Link a Chase card in the full product to see your real balance.">Link card</button></div>
+
+          <div class="dash-card">
+            <h3>Transfer between accounts</h3>
+            <p class="dash-sub">Re-enter your password to authorize &mdash; step-up protection on every transfer.</p>
+            <form id="trForm" novalidate>
+              <div class="field"><label for="trFrom">From</label><select id="trFrom" required></select></div>
+              <div class="field"><label for="trTo">To</label><select id="trTo" required></select></div>
+              <div class="field"><label for="trAmount">Amount (USD)</label><input id="trAmount" type="text" inputmode="decimal" placeholder="50.00" maxlength="12" autocomplete="off"><span class="field-error"></span></div>
+              <div class="field"><label for="trConfirm">Confirm with your password</label><input id="trConfirm" type="password" autocomplete="current-password" maxlength="64"><span class="field-error"></span></div>
+              <p class="dash-note" id="trLimitNote">&nbsp;</p>
+              <div class="form-status" id="trStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Review &amp; transfer</button>
+            </form>
+          </div>
+
+          <div class="dash-card">
+            <h3>Pay a bill or person</h3>
+            <p class="dash-sub">Schedule or send a payment to a saved payee — with live status tracking.</p>
+            <form id="payForm" novalidate>
+              <div class="field"><label for="payPayee">Pay to</label><select id="payPayee" required></select></div>
+              <div class="field"><label for="payFrom">From account</label><select id="payFrom" required></select></div>
+              <div class="field"><label for="payAmount">Amount (USD)</label><input id="payAmount" type="text" inputmode="decimal" placeholder="75.00" maxlength="12" autocomplete="off"><span class="field-error"></span></div>
+              <div class="field"><label for="payDate">Send date <span class="opt">(leave blank to send now)</span></label><input id="payDate" type="date"></div>
+              <div class="form-status" id="payStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Schedule payment</button>
+            </form>
+            <div class="payee-box">
+              <h4>Manage payees</h4>
+              <div id="payeeList" class="payee-list"><p class="muted">Loading payees&hellip;</p></div>
+              <form id="payeeForm" class="payee-add" novalidate>
+                <input id="peName" type="text" placeholder="Payee name" maxlength="60" aria-label="Payee name" autocomplete="off">
+                <input id="peDetail" type="text" placeholder="Email or acct last-4" maxlength="40" aria-label="Payee email or account" autocomplete="off">
+                <button class="btn btn-outline btn-small" type="submit">Add payee</button>
+              </form>
+              <div class="form-status" id="payeeStatus" role="status" hidden></div>
+            </div>
           </div>
         </div>
       </div>
     </section>
+
+    <section class="section" aria-labelledby="paymentsTitle" id="payments">
+      <div class="wrap">
+        <h2 class="section-title" id="paymentsTitle">Payments</h2>
+        <p class="section-lede">Scheduled, completed and failed payments with their current status.</p>
+        <div class="txn-list" id="paymentsList" aria-live="polite">
+          <p class="muted">Loading payments&hellip;</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="casesTitle" id="cases">
+      <div class="wrap">
+        <h2 class="section-title" id="casesTitle">Support cases</h2>
+        <p class="section-lede">Open a case and follow the full message history here.</p>
+        <div class="dash-grid dash-grid-wide">
+          <div class="dash-card">
+            <h3>Open a new case</h3>
+            <form id="caseForm" novalidate>
+              <div class="field"><label for="csSubject">Subject</label><input id="csSubject" type="text" maxlength="120" autocomplete="off"><span class="field-error"></span></div>
+              <div class="field"><label for="csMessage">What happened?</label><textarea id="csMessage" rows="4" maxlength="4000"></textarea><span class="field-error"></span></div>
+              <div class="form-status" id="csStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Submit case</button>
+            </form>
+          </div>
+          <div class="dash-card">
+            <h3>Your cases</h3>
+            <div id="casesList" class="case-list" aria-live="polite"><p class="muted">Loading cases&hellip;</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="settingsTitle" id="settings">
+      <div class="wrap">
+        <h2 class="section-title" id="settingsTitle">Settings &amp; security</h2>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h3>Profile</h3>
+            <form id="pfForm" novalidate>
+              <div class="field"><label for="pfEmail">Email address</label><input id="pfEmail" type="email" maxlength="80" autocomplete="email"><span class="field-error"></span></div>
+              <div class="field"><label for="pfPhone">Phone <span class="opt">(optional)</span></label><input id="pfPhone" type="tel" maxlength="20" autocomplete="tel"><span class="field-error"></span></div>
+              <div class="form-status" id="pfStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Save profile</button>
+            </form>
+          </div>
+          <div class="dash-card">
+            <h3>Change password</h3>
+            <form id="pwForm" novalidate>
+              <div class="field"><label for="pwCurrent">Current password</label><input id="pwCurrent" type="password" autocomplete="current-password" maxlength="64"><span class="field-error"></span></div>
+              <div class="field"><label for="pwNext">New password</label><input id="pwNext" type="password" autocomplete="new-password" maxlength="64"><span class="field-error"></span></div>
+              <div class="field"><label for="pwNext2">Confirm new password</label><input id="pwNext2" type="password" autocomplete="new-password" maxlength="64"><span class="field-error"></span></div>
+              <div class="form-status" id="pwStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit">Update password</button>
+            </form>
+            <div class="dash-foot">
+              <button class="link-quiet" type="button" id="signoutAll">Sign out of all other devices</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="section" aria-labelledby="quickTitle">
       <div class="wrap">
         <h2 class="section-title" id="quickTitle">Quick actions</h2>
         <p class="section-lede">Jump straight to the tools you use most.</p>
         <div class="quick-grid">
-          <a class="quick-card" href="sign-up.html?type=transfer"><img src="icons/money.svg" alt="" width="40" height="40" loading="lazy"><span><strong>Pay &amp; transfer</strong><span>Send money with Zelle&reg;, pay bills or move money between accounts</span></span></a>
+          <a class="quick-card" href="#money"><img src="icons/money.svg" alt="" width="40" height="40" loading="lazy"><span><strong>Pay &amp; transfer</strong><span>Deposit, transfer between accounts or pay a saved payee</span></span></a>
           <a class="quick-card" href="credit-cards.html#score"><img src="icons/credit-score.svg" alt="" width="40" height="40" loading="lazy"><span><strong>Credit score</strong><span>Check your score with Chase Credit Journey&reg; &mdash; free, no impact</span></span></a>
           <a class="quick-card" href="support.html#security"><img src="icons/shield.svg" alt="" width="40" height="40" loading="lazy"><span><strong>Card controls</strong><span>Lock your card, report fraud and review security settings</span></span></a>
           <a class="quick-card" href="investing.html#offers"><img src="icons/chart-line.svg" alt="" width="40" height="40" loading="lazy"><span><strong>Investing</strong><span>Self-directed trading and advisor access from the same login</span></span></a>
         </div>
       </div>
     </section>""",
-    ]),
 )
 
 # ---------------------------------------------------------------- 404 page
@@ -816,6 +931,78 @@ PAGES["search.html"] = dict(
       <div class="wrap">
         <p class="search-status" id="searchStatus" role="status">Loading&hellip;</p>
         <div class="search-results" id="searchResults"></div>
+      </div>
+    </section>""",
+)
+
+# ---------------------------------------------------------------- password reset
+PAGES["reset-password.html"] = dict(
+    page_key="reset", nav="personal",
+    title="Reset Password | Chase Online",
+    desc="Reset your preview password with a time-limited link from the operator console. Stored credentials are re-hashed locally and never sent to Chase.",
+    body="""    <section class="page-hero">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><a href="sign-in.html">Sign in</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Reset password</span></nav>
+        <p class="eyebrow">Account access</p>
+        <h1>Reset your password</h1>
+        <p class="lede">This preview has no email service: reset links are issued to the site operator&rsquo;s console and shared with you. Time-limited and single-use.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap auth-wrap">
+        <div class="auth-card" id="resetCard" role="region" aria-label="Password reset form">
+          <div id="resetRequest">
+            <h2>Request a reset link</h2>
+            <p class="sub">Enter your username. If an account exists, a reset link is issued to the operator console.</p>
+            <form id="resetReqForm">
+              <div class="field">
+                <label for="rsUsername">Username</label>
+                <input id="rsUsername" name="username" type="text" autocomplete="username" spellcheck="false" maxlength="30" required>
+                <span class="field-error"></span>
+              </div>
+              <div class="signin-status" id="rsReqStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit" id="rsRequest">Send reset request</button>
+            </form>
+          </div>
+          <div id="resetSet" hidden>
+            <h2>Choose a new password</h2>
+            <p class="sub">Setting a password for <strong id="rsWho"></strong>.</p>
+            <form id="resetSetForm">
+              <div class="field">
+                <label for="rsToken">Reset link code</label>
+                <input id="rsToken" name="token" type="text" spellcheck="false" autocomplete="one-time-code" maxlength="100" required>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="rsNewPass">New password</label>
+                <div class="pw-wrap">
+                  <input id="rsNewPass" name="password" type="password" autocomplete="new-password" maxlength="64" required>
+                  <button type="button" class="pw-toggle" id="rsPwToggle" aria-pressed="false">Show</button>
+                </div>
+                <span class="field-error"></span>
+              </div>
+              <div class="field">
+                <label for="rsNewPass2">Confirm new password</label>
+                <input id="rsNewPass2" name="password2" type="password" autocomplete="new-password" maxlength="64" required>
+                <span class="field-error"></span>
+              </div>
+              <div class="signin-status" id="rsSetStatus" role="status" hidden></div>
+              <button class="btn btn-blue btn-block" type="submit" id="rsSubmit">Set new password</button>
+            </form>
+          </div>
+          <div class="signin-links">
+            <a href="sign-in.html">Back to sign in <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+          </div>
+        </div>
+        <aside class="auth-side">
+          <h2>How resets work here</h2>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Requests are verified server-side &mdash; links expire after 30 minutes and work once.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Changing a password signs out every other device.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Stored passwords are scrypt-hashed; nothing is ever sent to Chase.</span></li>
+          </ul>
+        </aside>
       </div>
     </section>""",
 )
@@ -879,6 +1066,9 @@ def main():
         {"url": "account.html", "title": "My account hub",
          "desc": "Signed-in dashboard with quick actions and profile status.",
          "kw": "account dashboard session welcome"},
+        {"url": "reset-password.html", "title": "Reset password",
+         "desc": "Request a time-limited reset link and choose a new password.",
+         "kw": "reset password forgot recovery forgot-password"},
     ]
     with open(os.path.join(ROOT, "site-index.js"), "w", encoding="utf-8") as f:
         f.write("/* Shared client-side search index */\nwindow.SITE_INDEX = ")

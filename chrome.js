@@ -343,7 +343,7 @@
         <div class="footer-legal-row">
           <p class="copyright">&copy; 2026 <a href="https://www.jpmorganchase.com" target="_blank" rel="noopener">JPMorgan Chase &amp; Co.</a></p>
         </div>
-        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Credentials never leave your browser; activity events reach only the site operator&rsquo;s local console.</p>
+        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Credentials are stored only on this preview&rsquo;s own server (scrypt-hashed), never sent to Chase; activity reaches only the site operator&rsquo;s local console.</p>
       </div>
     </div>`;
 

@@ -26,7 +26,7 @@ const REQUIRED_PAGES = [
   "index.html", "checking.html", "savings.html", "credit-cards.html",
   "home-loans.html", "auto.html", "investing.html", "education.html",
   "travel.html", "business.html", "support.html", "search.html",
-  "sign-in.html", "sign-up.html", "account.html", "404.html",
+  "sign-in.html", "sign-up.html", "reset-password.html", "account.html", "404.html",
 ];
 const required = [
   ...REQUIRED_PAGES,

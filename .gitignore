@@ -1,0 +1,7 @@
+# runtime data & secrets — never committed
+data/
+.env
+*.log
+
+# dependencies / build output (none expected — zero-dep by design)
+node_modules/

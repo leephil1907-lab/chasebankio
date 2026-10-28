@@ -52,23 +52,52 @@
   });
 
   /* ================================================================
-     2. Session helpers (local-only preview auth)
+     2. API client + server session helpers
      ================================================================ */
-  const getSession = () => {
-    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); }
-    catch { return null; }
+  const api = async (path, opts = {}) => {
+    const { method = "GET", body } = opts;
+    let res;
+    try {
+      res = await fetch(path, {
+        method,
+        headers: {
+          "X-Requested-With": "fetch",
+          ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        credentials: "same-origin",
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      const e = new Error("Can\u2019t reach the site server \u2014 check that it is running, then try again.");
+      e.status = 0; e.code = "offline";
+      throw e;
+    }
+    let data = null;
+    try { data = await res.json(); } catch { /* no body */ }
+    if (!res.ok) {
+      const e = new Error((data && data.error && data.error.message) || "Something went wrong \u2014 please try again.");
+      e.status = res.status;
+      e.code = data && data.error && data.error.code;
+      throw e;
+    }
+    return data;
   };
-  const setSession = (user) => {
-    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch {}
-  };
-  const clearSession = () => {
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+
+  let currentUser = null; /* server-verified session; null = signed out */
+  const fetchSession = async () => {
+    try { const d = await api("/api/auth/session"); currentUser = d.user || null; }
+    catch { currentUser = null; }
+    return currentUser;
   };
   const firstName = (user) => (user && (user.name || user.username || "").trim().split(/\s+/)[0]) || "there";
   const validUsername = (v) => v.trim().length >= 3;
   const validPassword = (v) => v.length >= 8;
-
-  const goAccount = () => { window.location.href = "account.html"; };
+  const nextAfterLogin = () => {
+    const raw = String(new URLSearchParams(location.search).get("next") || "").trim();
+    const m = /^([a-z0-9-]{1,40})(\.html)?$/i.exec(raw);
+    const dest = m ? m[1].toLowerCase() + ".html" : "account.html";
+    return dest === "sign-in.html" || dest === "sign-up.html" ? "account.html" : dest;
+  };
 
   /* ================================================================
      3. Header account state (signed in vs signed out)
@@ -76,15 +105,21 @@
   const renderHeaderAccount = () => {
     const slot = $("#headerAccount");
     if (!slot) return;
-    const user = getSession();
+    const user = currentUser;
     if (user) {
       slot.innerHTML =
-        `<span class="welcome-chip"><span class="avatar" aria-hidden="true">${firstName(user).charAt(0).toUpperCase()}</span>Welcome, ${firstName(user).replace(/[<>&"]/g, "")}</span>` +
+        `<a class="welcome-chip" href="account.html" aria-label="My account"><span class="avatar" aria-hidden="true">${firstName(user).charAt(0).toUpperCase()}</span><span class="welcome-name">Welcome, ${firstName(user).replace(/[<>&"]/g, "")}</span></a>` +
         `<a class="header-link" href="account.html">My account</a>` +
         `<button class="btn btn-outline btn-small" id="signoutBtn" type="button">Sign out</button>`;
       const out = $("#signoutBtn");
-      if (out) out.addEventListener("click", () => { clearSession(); window.location.href = "index.html"; });
+      if (out) out.addEventListener("click", async () => {
+        out.disabled = true;
+        try { await api("/api/auth/logout", { method: "POST" }); } catch { /* best effort */ }
+        window.location.href = "index.html";
+      });
     }
+    /* Signed out → leave chrome's default "Sign in" markup untouched
+       (the toggle button lives inside this slot). */
   };
 
   /* ================================================================
@@ -109,7 +144,7 @@
       });
     }
 
-    const attempt = () => {
+    const attempt = async () => {
       if (!validUsername(user.value)) {
         if (notice) {
           notice.textContent = "Enter your username (at least 3 characters).";
@@ -130,7 +165,8 @@
         if (onFail) onFail();
         return;
       }
-      if (remember && remember.checked) {
+      const remembered = !!(remember && remember.checked);
+      if (remembered) {
         try { localStorage.setItem(REMEMBER_KEY, user.value.trim()); } catch {}
       } else {
         try { localStorage.removeItem(REMEMBER_KEY); } catch {}
@@ -138,16 +174,26 @@
       submit.classList.add("is-busy");
       submit.disabled = true;
       const label = submit.textContent;
-      submit.textContent = "Signing in…";
-      window.setTimeout(() => {
+      submit.textContent = "Signing in\u2026";
+      try {
+        const uname = user.value.trim();
+        const d = await api("/api/auth/login", {
+          method: "POST",
+          body: { username: uname, password: pass.value, remember: remembered },
+        });
+        currentUser = d.user;
+        if (window.SiteNotify) window.SiteNotify.send("signin", { username: uname }).catch(() => {});
+        window.location.href = nextAfterLogin();
+      } catch (err) {
         submit.classList.remove("is-busy");
         submit.disabled = false;
         submit.textContent = label;
-        const uname = user.value.trim();
-        setSession({ name: uname, username: uname, at: Date.now() });
-        if (window.SiteNotify) window.SiteNotify.send("signin", { username: uname }).catch(() => {});
-        goAccount();
-      }, 650);
+        if (notice) {
+          notice.textContent = (err && err.message) || "Sign-in failed \u2014 try again.";
+          notice.classList.add("is-error");
+          notice.hidden = false;
+        }
+      }
     };
 
     submit.addEventListener("click", attempt);
@@ -431,18 +477,26 @@
       });
     }
 
-    const finish = e => {
+    const finish = async (e) => {
       e.preventDefault();
       if (!validateStep(2)) return;
+      const notice = $("#suNotice");
+      const first = $("#suFirst").value.trim();
+      const last = $("#suLast").value.trim();
+      const name = `${first} ${last}`;
       const u = $("#suNewUser").value.trim();
-      const name = `${$("#suFirst").value.trim()} ${$("#suLast").value.trim()}`;
-      const email = $("#suEmail").value.trim();
+      const mail = $("#suEmail").value.trim();
       const btn = $("#suFinish");
       btn.disabled = true;
-      btn.textContent = "Creating account…";
-      window.setTimeout(() => {
-        setSession({ name, username: u, email, at: Date.now() });
-        if (window.SiteNotify) window.SiteNotify.send("signup", { name, username: u, email }).catch(() => {});
+      btn.textContent = "Creating account\u2026";
+      if (notice) { notice.hidden = true; notice.classList.remove("is-error"); }
+      try {
+        const d = await api("/api/auth/register", {
+          method: "POST",
+          body: { first, last, email: mail, dob: $("#suDob").value, username: u, password: $("#suNewPass").value },
+        });
+        currentUser = d.user;
+        if (window.SiteNotify) window.SiteNotify.send("signup", { name, username: u, email: mail }).catch(() => {});
         $$(".su-step", signup).forEach((s) => { s.hidden = true; });
         chips.forEach((c) => { c.classList.remove("active"); c.classList.add("done"); });
         const done = $("#suSuccess");
@@ -450,7 +504,15 @@
         done.setAttribute("tabindex", "-1");
         done.focus();
         document.querySelector(".signup-progress").hidden = true;
-      }, 900);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Create account";
+        if (notice) {
+          notice.textContent = (err && err.message) || "Could not create the account.";
+          notice.classList.add("is-error");
+          notice.hidden = false;
+        }
+      }
     };
     const finishBtn = $("#suFinish");
     if (finishBtn) finishBtn.addEventListener("click", finish);
@@ -459,18 +521,456 @@
   }
 
   /* ================================================================
-     9. Account page guard + welcome
+     9. Account dashboard (server-backed: balances, activity, money
+        movement, payments, support cases and settings)
      ================================================================ */
-  if (document.body.dataset.page === "account") {
-    const user = getSession();
-    if (!user) {
-      window.location.replace("sign-in.html?next=account");
-    } else {
-      $$("[data-greeting]").forEach((el) => { el.textContent = `Welcome, ${firstName(user)}`; });
-      $$("[data-username-badge]").forEach((el) => { el.textContent = user.username || ""; });
-      $$("[data-email-badge]").forEach((el) => { el.textContent = user.email || "—"; });
+  const fmt = (c) => (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const esc = (s) => String(s == null ? "" : s).replace(/[<>&"']/g, (ch) =>
+    ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const dshort = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); };
+  const dtime = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); };
+  const setSt = (el, state, msg) => {
+    if (!el) return;
+    el.hidden = false;
+    el.className = "form-status " + (state === "error" ? "is-error" : state === "ok" ? "is-ok" : "is-busy-state");
+    el.textContent = msg;
+  };
+  const amtOk = (v) => /^\d+(\.\d{1,2})?$/.test(String(v || "").trim());
+
+  let accountsCache = [];
+  let txnShowAll = false;
+  const acctLabel = (a) => `${a.name} \u2022\u2022\u2022\u2022${a.last4}`;
+
+  const fillSelects = () => {
+    const open = accountsCache.filter((a) => a.status === "open");
+    const opts = open.map((a) => `<option value="${a.id}">${esc(acctLabel(a))} \u2014 ${fmt(a.balanceCents)}</option>`).join("");
+    ["#depAccount", "#trFrom", "#trTo", "#payFrom"].forEach((sel) => { const el = $(sel); if (el) el.innerHTML = opts; });
+    const to = $("#trTo");
+    if (to && to.options.length > 1) to.selectedIndex = 1;
+  };
+
+  const renderAccounts = (accts) => {
+    accountsCache = accts;
+    const grid = $("#acctGrid");
+    if (!grid) return;
+    grid.setAttribute("aria-busy", "false");
+    if (!accts.length) {
+      grid.innerHTML = `<div class="acct-card"><span class="acct-label">No accounts yet</span></div>`;
+      return;
     }
-  }
+    grid.innerHTML = accts.map((a) => `
+      <div class="acct-card">
+        <span class="acct-tag ${a.status === "open" ? "is-open" : ""}">${a.status === "open" ? "Open" : esc(a.status)}</span>
+        <span class="acct-label">${esc(a.name)}</span>
+        <span class="acct-balance">${fmt(a.balanceCents)}</span>
+        <span class="acct-meta">${esc(a.masked)} &middot; opened ${dshort(a.openedAt)}</span>
+        <div class="acct-actions"><a class="btn btn-outline btn-small" href="#money">Move money</a></div>
+      </div>`).join("");
+    const total = accts.reduce((n, a) => n + a.balanceCents, 0);
+    const rel = $("#relLine");
+    if (rel) rel.textContent = `${accts.length} accounts \u00b7 ${fmt(total)} combined \u00b7 member since ${dshort(currentUser && currentUser.memberSince)}`;
+    fillSelects();
+  };
+
+  const renderTxns = (rows) => {
+    const box = $("#txnsList");
+    if (!box) return;
+    if (!rows.length) {
+      box.innerHTML = `<p class="muted">No activity yet \u2014 add a deposit under <a href="#money">Move money</a> to get started.</p>`;
+      return;
+    }
+    box.innerHTML = rows.map((t) => `
+      <div class="txn-row">
+        <span class="txn-ico ${t.amountCents >= 0 ? "pos" : ""}" aria-hidden="true">${t.amountCents >= 0 ? "\u2193" : "\u2191"}</span>
+        <span class="txn-main"><strong>${esc(t.label)}</strong><span>${dtime(t.ts)}${t.memo ? ` \u00b7 ${esc(t.memo)}` : ""}${t.status && t.status !== "completed" ? ` \u00b7 <em class="txn-st st-${esc(t.status)}">${esc(t.status)}</em>` : ""}</span></span>
+        <span class="txn-amt ${t.amountCents >= 0 ? "pos" : "neg"}">${t.amountCents >= 0 ? "+" : ""}${fmt(t.amountCents)}</span>
+        <span class="txn-bal">${fmt(t.balanceAfterCents)} bal.</span>
+      </div>`).join("");
+  };
+
+  const loadTxns = async () => {
+    try {
+      const d = await api(`/api/transactions?limit=${txnShowAll ? 200 : 8}`);
+      renderTxns(d.transactions);
+      const more = $("#txnsMore");
+      if (more) {
+        more.hidden = txnShowAll ? d.transactions.length < 1 : d.transactions.length < 8;
+        more.textContent = txnShowAll ? "Show recent only" : "Show all";
+      }
+    } catch (e) {
+      const box = $("#txnsList");
+      if (box) box.innerHTML = `<p class="form-status is-error">${esc(e.message)}</p>`;
+    }
+  };
+
+  const loadLimits = async () => {
+    try {
+      const l = await api("/api/limits");
+      const note = $("#trLimitNote");
+      if (note) note.textContent =
+        `Daily limit ${fmt(l.transferDailyCents)} \u2014 ${fmt(l.transferUsedTodayCents)} used today \u00b7 max ${fmt(l.transferMaxCents)} per transfer.`;
+    } catch { /* limits are advisory in the UI */ }
+  };
+
+  const refreshDash = async () => {
+    try { const d = await api("/api/accounts"); renderAccounts(d.accounts); } catch { /* keep last */ }
+    loadTxns();
+    loadLimits();
+  };
+
+  const loadPayees = async () => {
+    try {
+      const d = await api("/api/payees");
+      const list = $("#payeeList");
+      const sel = $("#payPayee");
+      if (list) {
+        list.innerHTML = d.payees.length
+          ? d.payees.map((p) => `
+            <span class="payee-chip">${esc(p.name)} <span class="payee-det">${esc(p.detail)}</span>
+              <button type="button" class="payee-x" data-pe-del="${p.id}" aria-label="Remove ${esc(p.name)}">&times;</button>
+            </span>`).join("")
+          : `<p class="muted">No payees yet \u2014 add one below to schedule a payment.</p>`;
+      }
+      if (sel) {
+        sel.innerHTML = d.payees.map((p) => `<option value="${p.id}">${esc(p.name)} (${esc(p.detail)})</option>`).join("");
+        sel.disabled = !d.payees.length;
+      }
+    } catch (e) {
+      const list = $("#payeeList");
+      if (list) list.innerHTML = `<p class="form-status is-error">${esc(e.message)}</p>`;
+    }
+  };
+
+  const payChip = (s) => `<span class="status-chip st-${esc(s)}">${esc(s)}</span>`;
+  const loadPayments = async () => {
+    try {
+      const d = await api("/api/payments");
+      const box = $("#paymentsList");
+      if (!box) return;
+      box.innerHTML = d.payments.length
+        ? d.payments.map((p) => `
+          <div class="txn-row">
+            <span class="txn-main"><strong>${esc(p.payeeName)}</strong><span>
+              ${p.scheduledFor ? `scheduled for ${dshort(p.scheduledFor)}` : `created ${dtime(p.createdAt)}`} \u00b7 ${esc(p.accountType)}
+              ${p.status === "failed" && p.failureReason ? ` \u00b7 ${esc(String(p.failureReason).replace(/_/g, " "))}` : ""}
+            </span></span>
+            ${p.status === "scheduled" ? `<button type="button" class="btn btn-outline btn-small" data-pay-cancel="${p.id}">Cancel</button>` : payChip(p.status)}
+            <span class="txn-amt neg">${fmt(-p.amountCents)}</span>
+          </div>`).join("")
+        : `<p class="muted">No payments yet \u2014 add a payee and schedule one under Move money.</p>`;
+    } catch (e) {
+      const box = $("#paymentsList");
+      if (box) box.innerHTML = `<p class="form-status is-error">${esc(e.message)}</p>`;
+    }
+  };
+
+  const caseChip = (s) => `<span class="status-chip st-${esc(s)}">case ${esc(s)}</span>`;
+  const loadCases = async () => {
+    try {
+      const d = await api("/api/support");
+      const box = $("#casesList");
+      if (!box) return;
+      box.innerHTML = d.cases.length
+        ? d.cases.map((c) => `
+          <details class="case-card" ${c.status === "open" ? "open" : ""}>
+            <summary>
+              <span class="case-id">${esc(c.id)}</span>
+              <strong>${esc(c.subject)}</strong>
+              ${caseChip(c.status)}
+              <span class="case-date">${dshort(c.createdAt)}</span>
+            </summary>
+            <div class="case-thread">
+              ${c.messages.map((m) => `
+                <div class="case-msg ${m.from === "operator" ? "from-op" : ""}">
+                  <span class="case-who">${m.from === "operator" ? "Support" : "You"}</span>
+                  <p>${esc(m.text)}</p>
+                  <span class="case-when">${dtime(m.ts)}</span>
+                </div>`).join("")}
+            </div>
+          </details>`).join("")
+        : `<p class="muted">No cases yet \u2014 open one and the full message history appears here.</p>`;
+    } catch (e) {
+      const box = $("#casesList");
+      if (box) box.innerHTML = `<p class="form-status is-error">${esc(e.message)}</p>`;
+    }
+  };
+
+  const busy = (btn, on, label) => {
+    if (!btn) return () => {};
+    const original = btn.dataset.label || btn.textContent;
+    btn.dataset.label = original;
+    if (on) { btn.disabled = true; btn.textContent = label || "Working\\u2026"; }
+    else { btn.disabled = false; btn.textContent = original; }
+    return () => {};
+  };
+
+  const bindAccountForms = () => {
+    if (window.__acctBound) return;
+    window.__acctBound = true;
+
+    /* ---- deposit ---- */
+    const depForm = $("#depForm");
+    if (depForm) depForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amt = $("#depAmount"), st = $("#depStatus");
+      amt.closest(".field").classList.remove("invalid");
+      if (!amtOk(amt.value) || parseFloat(amt.value) <= 0) {
+        amt.closest(".field").classList.add("invalid");
+        amt.closest(".field").querySelector(".field-error").textContent = "Enter an amount like 250.00.";
+        amt.focus();
+        return;
+      }
+      const btn = depForm.querySelector("button[type=submit]");
+      busy(btn, true, "Depositing\\u2026");
+      try {
+        const d = await api("/api/deposits", { method: "POST", body: {
+          accountId: $("#depAccount").value, amount: amt.value.trim(), memo: $("#depMemo").value.trim(),
+        }});
+        setSt(st, "ok", `Deposit complete \u2014 new balance in ${d.account.name}: ${fmt(d.account.balanceCents)}.`);
+        showToast("Deposit added.");
+        depForm.reset();
+        refreshDash();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+
+    /* ---- transfer (step-up password authorization) ---- */
+    const trForm = $("#trForm");
+    if (trForm) trForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amt = $("#trAmount"), pw = $("#trConfirm"), st = $("#trStatus");
+      [amt, pw].forEach((el) => el.closest(".field").classList.remove("invalid"));
+      const failField = (el, msg) => {
+        const f = el.closest(".field");
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = msg;
+        el.focus();
+        return false;
+      };
+      if ($("#trFrom").value === $("#trTo").value) return failField($("#trTo"), "Choose two different accounts.");
+      if (!amtOk(amt.value) || parseFloat(amt.value) <= 0) return failField(amt, "Enter an amount like 50.00.");
+      if (!pw.value) return failField(pw, "Enter your password to authorize this transfer.");
+      const btn = trForm.querySelector("button[type=submit]");
+      busy(btn, true, "Transferring\\u2026");
+      try {
+        const d = await api("/api/transfers", { method: "POST", body: {
+          fromId: $("#trFrom").value, toId: $("#trTo").value,
+          amount: amt.value.trim(), confirmPassword: pw.value,
+        }});
+        setSt(st, "ok", `Sent ${fmt(d.transactions[0].amountCents * -1)} \u2014 ${d.from.name} \u2192 ${d.to.name}.`);
+        showToast("Transfer complete.");
+        trForm.reset();
+        fillSelects();
+        refreshDash();
+      } catch (err) {
+        if (err.code === "bad_confirmation") failField(pw, err.message);
+        setSt(st, "error", err.message);
+      }
+      busy(btn, false);
+    });
+
+    /* ---- payees ---- */
+    const peForm = $("#payeeForm");
+    if (peForm) peForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const st = $("#payeeStatus");
+      const name = $("#peName"), det = $("#peDetail");
+      [name, det].forEach((el) => el.closest(".field") && el.closest(".field").classList.remove("invalid"));
+      if (name.value.trim().length < 2) { name.focus(); setSt(st, "error", "Enter the payee\\u2019s name."); return; }
+      if (det.value.trim().length < 2) { det.focus(); setSt(st, "error", "Enter an email or account last-4 for the payee."); return; }
+      const btn = peForm.querySelector("button[type=submit]");
+      busy(btn, true, "Adding\\u2026");
+      try {
+        await api("/api/payees", { method: "POST", body: { name: name.value.trim(), detail: det.value.trim() } });
+        setSt(st, "ok", "Payee added.");
+        peForm.reset();
+        loadPayees();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+    const peList = $("#payeeList");
+    if (peList) peList.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-pe-del]");
+      if (!b) return;
+      b.disabled = true;
+      try { await api(`/api/payees/${b.dataset.peDel}`, { method: "DELETE" }); loadPayees(); }
+      catch (err) { b.disabled = false; setSt($("#payeeStatus"), "error", err.message); }
+    });
+
+    /* ---- payment ---- */
+    const payForm = $("#payForm");
+    if (payForm) {
+      const dateEl = $("#payDate");
+      if (dateEl) dateEl.min = new Date().toISOString().slice(0, 10);
+      payForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const amt = $("#payAmount"), st = $("#payStatus");
+        amt.closest(".field").classList.remove("invalid");
+        if (!amtOk(amt.value) || parseFloat(amt.value) <= 0) {
+          amt.closest(".field").classList.add("invalid");
+          amt.closest(".field").querySelector(".field-error").textContent = "Enter an amount like 75.00.";
+          amt.focus();
+          return;
+        }
+        const sel = $("#payPayee");
+        if (sel.disabled || !sel.value) { setSt(st, "error", "Add a payee first."); return; }
+        const btn = payForm.querySelector("button[type=submit]");
+        busy(btn, true, "Scheduling\\u2026");
+        try {
+          const d = await api("/api/payments", { method: "POST", body: {
+            payeeId: sel.value, accountId: $("#payFrom").value,
+            amount: amt.value.trim(), scheduledFor: dateEl && dateEl.value ? dateEl.value : null,
+          }});
+          setSt(st, "ok", d.payment.status === "scheduled"
+            ? `Payment to ${d.payment.payeeName} scheduled for ${dshort(d.payment.scheduledFor)}.`
+            : `Payment to ${d.payment.payeeName} sent \u2014 new balance ${fmt(d.account.balanceCents)}.`);
+          showToast("Payment recorded.");
+          payForm.reset();
+          refreshDash();
+          loadPayments();
+        } catch (err) { setSt(st, "error", err.message); }
+        busy(btn, false);
+      });
+    }
+    const payList = $("#paymentsList");
+    if (payList) payList.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-pay-cancel]");
+      if (!b) return;
+      b.disabled = true;
+      try {
+        await api(`/api/payments/${b.dataset.payCancel}`, { method: "DELETE" });
+        showToast("Scheduled payment cancelled.");
+        loadPayments();
+      } catch (err) { b.disabled = false; showToast(err.message); }
+    });
+
+    /* ---- support cases ---- */
+    const caseForm = $("#caseForm");
+    if (caseForm) caseForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subj = $("#csSubject"), msg = $("#csMessage"), st = $("#csStatus");
+      [subj, msg].forEach((el) => el.closest(".field").classList.remove("invalid"));
+      const failF = (el, m) => {
+        const f = el.closest(".field");
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = m;
+        el.focus();
+        return false;
+      };
+      if (subj.value.trim().length < 3) return failF(subj, "Give your case a short subject.");
+      if (msg.value.trim().length < 5) return failF(msg, "Tell us a little more (at least 5 characters).");
+      const btn = caseForm.querySelector("button[type=submit]");
+      busy(btn, true, "Submitting\\u2026");
+      try {
+        const d = await api("/api/support", { method: "POST", body: {
+          category: "account", subject: subj.value.trim(), message: msg.value.trim(),
+        }});
+        setSt(st, "ok", `Case ${d.case.id} opened \u2014 replies appear in this list.`);
+        showToast(`Case ${d.case.id} opened.`);
+        caseForm.reset();
+        loadCases();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+
+    /* ---- profile ---- */
+    const pfForm = $("#pfForm");
+    if (pfForm) pfForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#pfEmail"), phone = $("#pfPhone"), st = $("#pfStatus");
+      [email, phone].forEach((el) => el.closest(".field").classList.remove("invalid"));
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
+        const f = email.closest(".field");
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = "Enter a valid email address.";
+        email.focus();
+        return;
+      }
+      const btn = pfForm.querySelector("button[type=submit]");
+      busy(btn, true, "Saving\\u2026");
+      try {
+        const d = await api("/api/me", { method: "PATCH", body: { email: email.value.trim(), phone: phone.value.trim() } });
+        currentUser = d.user;
+        setSt(st, "ok", "Profile saved.");
+        $$("[data-email-badge]").forEach((el) => { el.textContent = d.user.email; });
+        renderHeaderAccount();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+
+    /* ---- change password ---- */
+    const pwForm = $("#pwForm");
+    if (pwForm) pwForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cur = $("#pwCurrent"), next = $("#pwNext"), next2 = $("#pwNext2"), st = $("#pwStatus");
+      [cur, next, next2].forEach((el) => el.closest(".field").classList.remove("invalid"));
+      const failF = (el, m) => {
+        const f = el.closest(".field");
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = m;
+        el.focus();
+        return false;
+      };
+      if (!cur.value) return failF(cur, "Enter your current password.");
+      if (next.value.length < 8) return failF(next, "New password must be at least 8 characters.");
+      if (next.value !== next2.value) return failF(next2, "Passwords do not match.");
+      const btn = pwForm.querySelector("button[type=submit]");
+      busy(btn, true, "Updating\\u2026");
+      try {
+        const d = await api("/api/auth/change-password", { method: "POST", body: { current: cur.value, next: next.value } });
+        setSt(st, "ok", d.revokedOtherSessions > 0
+          ? `Password updated \u2014 ${d.revokedOtherSessions} other session${d.revokedOtherSessions === 1 ? "" : "s"} signed out.`
+          : "Password updated.");
+        pwForm.reset();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+
+    /* ---- sign out others ---- */
+    const soAll = $("#signoutAll");
+    if (soAll) soAll.addEventListener("click", async () => {
+      soAll.disabled = true;
+      try {
+        const d = await api("/api/auth/logout-others", { method: "POST" });
+        showToast(d.revoked > 0 ? `Signed out ${d.revoked} other device${d.revoked === 1 ? "" : "s"}.` : "No other devices were signed in.");
+      } catch (err) { showToast(err.message); }
+      soAll.disabled = false;
+    });
+
+    /* ---- header sign out on the account page ---- */
+    const so = $("#acctSignout");
+    if (so) so.addEventListener("click", async () => {
+      so.disabled = true;
+      try { await api("/api/auth/logout", { method: "POST" }); } catch { /* best effort */ }
+      window.location.href = "index.html";
+    });
+
+    /* ---- show all activity ---- */
+    const more = $("#txnsMore");
+    if (more) more.addEventListener("click", () => { txnShowAll = !txnShowAll; loadTxns(); });
+  };
+
+  const initAccountPage = async () => {
+    if (!currentUser) { window.location.replace("sign-in.html?next=account"); return; }
+    $$("[data-greeting]").forEach((el) => { el.textContent = `Welcome, ${firstName(currentUser)}`; });
+    $$("[data-username-badge]").forEach((el) => { el.textContent = currentUser.username || ""; });
+    $$("[data-email-badge]").forEach((el) => { el.textContent = currentUser.email || "\u2014"; });
+    const pfEmail = $("#pfEmail"); if (pfEmail) pfEmail.value = currentUser.email || "";
+    const pfPhone = $("#pfPhone"); if (pfPhone) pfPhone.value = currentUser.phone || "";
+    bindAccountForms();
+    try {
+      const d = await api("/api/accounts");
+      renderAccounts(d.accounts);
+    } catch (e) {
+      const grid = $("#acctGrid");
+      if (grid) { grid.setAttribute("aria-busy", "false"); grid.innerHTML = `<p class="form-status is-error">${esc(e.message)}</p>`; }
+    }
+    loadTxns();
+    loadLimits();
+    loadPayees();
+    loadPayments();
+    loadCases();
+  };
 
   /* ================================================================
      10. Search page + empty 404 search
@@ -592,14 +1092,25 @@
       if (name.value.trim().length < 2) return invalidField(name, "Enter your name.");
       if (email.value.trim() && !emailOK(email.value)) return invalidField(email, "Enter a valid email address.");
       if (msg.value.trim().length < 5) return invalidField(msg, "Tell us a little more (at least 5 characters).");
-      await deliver("feedback", {
-        name: name.value.trim(), email: email.value.trim(),
-        category: $("#fbCat").value, message: msg.value.trim()
-      }, $("#fbStatus"), {
-        sent: "Message delivered to the support console — thank you.",
-        queued: "The support console is offline — your message is saved on this device and will be delivered when it's available."
-      }, feedbackForm.querySelector("button[type=submit]"));
-      feedbackForm.reset();
+      const btn = feedbackForm.querySelector("button[type=submit]");
+      if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "Sending\u2026"; }
+      try {
+        const subject = msg.value.trim().slice(0, 60);
+        const d = await api("/api/support", { method: "POST", body: {
+          category: $("#fbCat").value || "feedback",
+          subject,
+          message: msg.value.trim(),
+          name: name.value.trim(),
+          email: email.value.trim() || undefined,
+        }});
+        formStatus($("#fbStatus"), "ok", currentUser
+          ? `Case ${d.case.id} opened \u2014 track it under Support cases in your account hub.`
+          : `Case ${d.case.id} opened \u2014 keep this case number for follow-up.`);
+        feedbackForm.reset();
+      } catch (err) {
+        formStatus($("#fbStatus"), "error", err.message);
+      }
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || "Send"; }
     });
     ["fbName", "fbEmail", "fbMsg"].forEach((id) => $("#" + id) && $("#" + id).addEventListener("input", (e) => clearField(e.target)));
   }
@@ -607,6 +1118,105 @@
   /* ================================================================
      11. Header account + boot
      ================================================================ */
-  renderHeaderAccount();
+  /* ================================================================
+     12. Password reset page (request link → console delivery → set new)
+     ================================================================ */
+  const rsReqForm = $("#resetReqForm");
+  if (rsReqForm) {
+    const params = new URLSearchParams(location.search);
+    const preU = (params.get("u") || "").trim();
+    const preT = (params.get("t") || "").trim();
+    if (preU) {
+      const uEl = $("#rsUsername");
+      if (uEl) uEl.value = preU;
+      if (preT) {
+        $("#resetRequest").hidden = true;
+        $("#resetSet").hidden = false;
+        const who = $("#rsWho"); if (who) who.textContent = preU;
+        const tEl = $("#rsToken"); if (tEl) tEl.value = preT;
+      }
+    }
+    rsReqForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const uEl = $("#rsUsername"), st = $("#rsReqStatus"), btn = $("#rsRequest");
+      const f = uEl.closest(".field");
+      f.classList.remove("invalid");
+      if (!uEl.value.trim()) {
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = "Enter your username.";
+        uEl.focus();
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = "Sending\u2026";
+      try {
+        const d = await api("/api/auth/forgot", { method: "POST", body: { username: uEl.value.trim() } });
+        st.hidden = false;
+        st.className = "signin-status is-ok";
+        st.textContent = d.message;
+        /* reveal the set panel so the operator-delivered code can be pasted
+           (the request panel stays visible so the honest delivery note remains) */
+        $("#resetSet").hidden = false;
+        const who = $("#rsWho"); if (who) who.textContent = uEl.value.trim();
+      } catch (err) {
+        st.hidden = false;
+        st.className = "signin-status is-error";
+        st.textContent = err.message;
+      }
+      btn.disabled = false;
+      btn.textContent = "Send reset request";
+    });
+  }
+  const rsSetForm = $("#resetSetForm");
+  if (rsSetForm) {
+    const rsToggle = $("#rsPwToggle");
+    if (rsToggle) rsToggle.addEventListener("click", () => {
+      const p = $("#rsNewPass");
+      const showing = p.type === "text";
+      p.type = showing ? "password" : "text";
+      rsToggle.textContent = showing ? "Show" : "Hide";
+      rsToggle.setAttribute("aria-pressed", String(!showing));
+    });
+    rsSetForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const tok = $("#rsToken"), p1 = $("#rsNewPass"), p2 = $("#rsNewPass2"), st = $("#rsSetStatus");
+      [tok, p1, p2].forEach((el) => el.closest(".field").classList.remove("invalid"));
+      const failF = (el, m) => {
+        const f = el.closest(".field");
+        f.classList.add("invalid");
+        f.querySelector(".field-error").textContent = m;
+        el.focus();
+        return false;
+      };
+      const uname = ($("#rsWho").textContent || "").trim();
+      if (!tok.value.trim()) return failF(tok, "Paste the code from your reset link.");
+      if (p1.value.length < 8) return failF(p1, "New password must be at least 8 characters.");
+      if (p1.value !== p2.value) return failF(p2, "Passwords do not match.");
+      const btn = $("#rsSubmit");
+      btn.disabled = true;
+      btn.textContent = "Setting password\u2026";
+      try {
+        await api("/api/auth/reset", { method: "POST", body: { username: uname, token: tok.value.trim(), password: p1.value } });
+        st.hidden = false;
+        st.className = "signin-status is-ok";
+        st.textContent = "Password updated. You can sign in now.";
+        rsSetForm.reset();
+        window.setTimeout(() => { window.location.href = "sign-in.html"; }, 1200);
+      } catch (err) {
+        st.hidden = false;
+        st.className = "signin-status is-error";
+        st.textContent = err.message;
+      }
+      btn.disabled = false;
+      btn.textContent = "Set new password";
+    });
+  }
+
   document.documentElement.classList.add("chrome-ready");
+  const bootSession = async () => {
+    await fetchSession();
+    renderHeaderAccount();
+    if (document.body.dataset.page === "account") await initAccountPage();
+  };
+  bootSession();
 })();
