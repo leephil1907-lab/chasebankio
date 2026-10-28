@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-28T19:48:45.303Z",
+  "updatedBy": "admin-console",
+  "banner": {
+    "enabled": false,
+    "text": "",
+    "link": "",
+    "linkLabel": "Learn more"
+  },
+  "maintenance": {
+    "enabled": false,
+    "title": "Scheduled maintenance",
+    "message": "We'll be back shortly. Thanks for your patience."
+  },
+  "hero": {
+    "amount": "",
+    "title": "",
+    "body": "",
+    "ctaLabel": "",
+    "ctaHref": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "hours": ""
+  },
+  "chat": {
+    "enabled": true,
+    "welcome": "Hi! I'm the automated Chase support assistant — ask me about checking, savings, credit cards, home loans or investing.",
+    "handoffNotice": ""
+  },
+  "notifications": {
+    "adminEndpoint": "http://127.0.0.1:7788"
+  },
+  "inject": {
+    "css": "",
+    "html": ""
+  }
+}
