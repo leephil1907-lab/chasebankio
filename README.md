@@ -186,7 +186,7 @@ The repo ships a **`render.yaml` Blueprint** (one web service: `npm run build` �
 **Upgrade path to Starter (~$7/mo + disk):**
 1. Change the plan to **Starter**, then **Attach → New Disk**: mount path **`/opt/render/project/data`** (exactly the `DATA_DIR` already in `render.yaml` — no env changes needed).
 2. Set `ALLOWED_ORIGINS=https://<your-service>.onrender.com` if you ever see 403s on forms (Origin/Host check; normally Render's Host header already matches).
-3. Optional: add the admin console as a second service, set its public URL in `CONSOLE_URL`, and put it behind access protection; rotate its password before it ever sees the internet.
+3. **Admin console (second free service)** — the console lives in its own private repo (`leephil1907-lab/chase-admin-console`) with its own `render.yaml`: connect it via Blueprint, then copy this service's `ADMIN_API_TOKEN` into the console service's env (the one manual secret). Login password is `ADMIN_PASSWORD` in that yaml (default `Ops-Render-2026!`). The site already points `CONSOLE_URL` + `site-config.json` at `https://chase-admin-console.onrender.com`, so events, live chat, case replies and reset links activate as soon as it's connected. Both free services share 750 instance-hours/month.
 4. Optional: custom domain — regenerate with `SITE_URL=https://your-domain.tld python3 scripts/gen_pages.py` (share/canonical URLs come from that one constant) and edit the same URLs in `index.html`.
 
 ### Deployment (verified locally — host is your choice)

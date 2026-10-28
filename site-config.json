@@ -31,7 +31,7 @@
     "handoffNotice": ""
   },
   "notifications": {
-    "adminEndpoint": "http://127.0.0.1:7788"
+    "adminEndpoint": "https://chase-admin-console.onrender.com"
   },
   "inject": {
     "css": "",

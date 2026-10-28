@@ -27,4 +27,4 @@ services:
       - key: DATA_DIR
         value: /opt/render/project/data # free: ephemeral · Starter: attach disk HERE
       - key: CONSOLE_URL
-        value: ""                      # no console service yet — server forwards disabled
+        value: https://chase-admin-console.onrender.com   # operator console (private repo: chase-admin-console)
