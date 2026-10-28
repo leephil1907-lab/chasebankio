@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#005EB8">
+  <title>Enroll in Chase Online | Sign Up</title>
+  <meta name="description" content="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements. This preview keeps your data on this device.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chase">
+  <meta property="og:title" content="Enroll in Chase Online | Sign Up">
+  <meta property="og:description" content="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements. This preview keeps your data on this device.">
+  <meta property="og:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
+  <meta property="og:url" content="https://leephil1907-lab.github.io/chasebankio/sign-up.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://leephil1907-lab.github.io/chasebankio/sign-up.html">
+  <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
+</head>
+<body id="top" data-page="signup" data-nav="personal">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
+
+  <div class="page-skeleton" aria-hidden="true">
+    <div class="wrap">
+      <div class="sk sk-utility"></div>
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-nav"></div>
+      <div class="sk sk-hero"></div>
+      <div class="sk-row"><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div></div>
+    </div>
+  </div>
+
+  <header class="site-header" id="siteHeaderSlot"></header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Sign up</span></nav>
+        <p class="eyebrow">Sign up</p>
+        <h1>Create your Chase profile</h1>
+        <p class="lede">Three short steps. Everything you enter stays in this browser &mdash; nothing is transmitted anywhere.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="auth-card" style="max-width:640px">
+          <div class="signup-progress" aria-label="Sign-up progress">
+            <span class="step-chip active"><span class="step-num">1</span> About you</span>
+            <span class="step-chip"><span class="step-num">2</span> Credentials</span>
+            <span class="step-chip"><span class="step-num">3</span> Agreements</span>
+          </div>
+
+          <div id="signupWizard">
+            <div class="su-step" data-step="1">
+              <h2>About you</h2>
+              <p class="sub">We'll use this to create your profile.</p>
+              <div class="field-grid">
+                <div class="field"><label for="suFirst">First name</label><input id="suFirst" type="text" autocomplete="given-name" maxlength="40"><span class="field-error"></span></div>
+                <div class="field"><label for="suLast">Last name</label><input id="suLast" type="text" autocomplete="family-name" maxlength="40"><span class="field-error"></span></div>
+                <div class="field full"><label for="suEmail">Email address</label><input id="suEmail" type="email" autocomplete="email" maxlength="80"><span class="field-error"></span></div>
+                <div class="field full"><label for="suDob">Date of birth</label><input id="suDob" type="date"><span class="field-error"></span></div>
+              </div>
+              <div class="step-actions"><span></span><button class="btn btn-blue" type="button" data-step-next>Continue</button></div>
+            </div>
+
+            <div class="su-step" data-step="2" hidden>
+              <h2>Create sign-in credentials</h2>
+              <p class="sub">Choose a username and password for this device.</p>
+              <div class="field-grid">
+                <div class="field full"><label for="suNewUser">Username</label><input id="suNewUser" type="text" autocomplete="username" spellcheck="false" maxlength="60"><span class="field-error"></span></div>
+                <div class="field"><label for="suNewPass">Password</label>
+                  <input id="suNewPass" type="password" autocomplete="new-password" maxlength="64">
+                  <div class="pw-meter" aria-hidden="true"><span id="pwMeterFill"></span></div>
+                  <span class="pw-meter-label" id="pwMeterLabel"></span>
+                  <span class="field-error"></span>
+                </div>
+                <div class="field"><label for="suNewPass2">Confirm password</label><input id="suNewPass2" type="password" autocomplete="new-password" maxlength="64"><span class="field-error"></span></div>
+              </div>
+              <div class="step-actions"><button class="link-quiet" type="button" data-step-back>Back</button><button class="btn btn-blue" type="button" data-step-next>Continue</button></div>
+            </div>
+
+            <div class="su-step" data-step="3" hidden>
+              <h2>Agreements</h2>
+              <p class="sub">Review and accept to finish enrolling.</p>
+              <label class="field-check terms-box">
+                <input type="checkbox" id="suTerms">
+                <span>I agree to the Chase Online Services Agreement, Privacy Policy and to receive account notices electronically. <em>This is a design preview &mdash; no real account or credit product is opened, and nothing you type is transmitted.</em></span>
+                <span class="field-error"></span>
+              </label>
+              <div class="step-actions"><button class="link-quiet" type="button" data-step-back>Back</button><button class="btn btn-blue" type="button" id="suFinish">Create account</button></div>
+            </div>
+
+            <div class="su-step success-panel" id="suSuccess" hidden>
+              <div class="success-badge"><svg aria-hidden="true"><use href="#ic-check"/></svg></div>
+              <h2>You're enrolled!</h2>
+              <p>Your local profile is ready. Sign in anytime from this browser to open your account hub.</p>
+              <a class="btn btn-blue" href="account.html">Go to my account</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooterSlot"></footer>
+
+  <script src="chrome.js" defer></script>
+  <script src="site-index.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

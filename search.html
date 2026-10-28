@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#005EB8">
+  <title>Search | Chase</title>
+  <meta name="description" content="Search this Chase design demo — checking, savings, cards, mortgages, business banking, investing and support topics.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chase">
+  <meta property="og:title" content="Search | Chase">
+  <meta property="og:description" content="Search this Chase design demo — checking, savings, cards, mortgages, business banking, investing and support topics.">
+  <meta property="og:image" content="https://leephil1907-lab.github.io/chasebankio/images/advisor.jpg">
+  <meta property="og:url" content="https://leephil1907-lab.github.io/chasebankio/search.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://leephil1907-lab.github.io/chasebankio/search.html">
+  <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
+</head>
+<body id="top" data-page="search" data-nav="support">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
+
+  <div class="page-skeleton" aria-hidden="true">
+    <div class="wrap">
+      <div class="sk sk-utility"></div>
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-nav"></div>
+      <div class="sk sk-hero"></div>
+      <div class="sk-row"><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div></div>
+    </div>
+  </div>
+
+  <header class="site-header" id="siteHeaderSlot"></header>
+
+  <main id="main">
+
+    <section class="search-hero" id="searchPage">
+      <div class="wrap">
+        <h1>Search Chase</h1>
+        <form class="search-box" id="searchForm" role="search" action="search.html" method="get">
+          <label class="sr-only" for="searchInput">Search the site</label>
+          <input id="searchInput" name="q" type="search" placeholder="Try &ldquo;checking&rdquo;, &ldquo;credit card&rdquo; or &ldquo;mortgage&rdquo;" autocomplete="off">
+          <button class="btn btn-blue" type="submit">Search</button>
+        </form>
+      </div>
+    </section>
+    <section class="section">
+      <div class="wrap">
+        <p class="search-status" id="searchStatus" role="status">Loading&hellip;</p>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooterSlot"></footer>
+
+  <script src="chrome.js" defer></script>
+  <script src="site-index.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
