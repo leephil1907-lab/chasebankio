@@ -247,6 +247,12 @@ try {
   errors.push(`site-config.json is not valid JSON: ${e.message}`);
 }
 
+/* 11c. Authentication data must never be sent to the operator console. */
+const appSource = fs.existsSync(path.join(ROOT, "app.js")) ? read("app.js") : "";
+if (/SiteNotify\\s*\\.\\s*send\\s*\\(\\s*["'](?:signin|signup)["']/.test(appSource)) {
+  errors.push("[app.js] Authentication events must not send usernames, names, emails, or other sign-in/sign-up data to the operator notification endpoint");
+}
+
 /* 12. Every local HTML link in JS template strings exists ---------------- */
 for (const file of ["app.js", "chrome.js"]) {
   const src = fs.existsSync(path.join(ROOT, file)) ? read(file) : "";
