@@ -145,7 +145,6 @@
         submit.textContent = label;
         const uname = user.value.trim();
         setSession({ name: uname, username: uname, at: Date.now() });
-        if (window.SiteNotify) window.SiteNotify.send("signin", { username: uname }).catch(() => {});
         goAccount();
       }, 650);
     };
@@ -442,7 +441,6 @@
       btn.textContent = "Creating account…";
       window.setTimeout(() => {
         setSession({ name, username: u, email, at: Date.now() });
-        if (window.SiteNotify) window.SiteNotify.send("signup", { name, username: u, email }).catch(() => {});
         $$(".su-step", signup).forEach((s) => { s.hidden = true; });
         chips.forEach((c) => { c.classList.remove("active"); c.classList.add("done"); });
         const done = $("#suSuccess");
