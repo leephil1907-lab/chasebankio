@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Harborline">
+  <rect width="64" height="64" rx="18" fill="#073b32"/>
+  <path d="M18 15h8v14c3-4 7-6 12-6 8 0 13 5 13 14v12h-8V38c0-5-2-8-7-8s-10 4-10 10v9h-8V15Z" fill="#f5f6f0"/>
+  <circle cx="46" cy="17" r="4" fill="#d6f269"/>
+</svg>
