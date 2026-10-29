@@ -69,7 +69,7 @@ window.SITE_INDEX = [
  {
   "url": "search.html",
   "title": "Search",
-  "desc": "Search all pages of this Chase design demo.",
+  "desc": "Search all pages of Chase.",
   "kw": "search find"
  },
  {

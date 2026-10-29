@@ -1309,17 +1309,7 @@ section[id], div[id] { scroll-margin-top: 24px; }
 .success-panel h2 { font-size: 26px; margin-bottom: 10px; }
 .success-panel p { color: var(--gray); font-size: 15.5px; margin-bottom: 24px; }
 
-/* ---------- Account dashboard ---------- */
-.demo-ribbon {
-  background: #FFF7E0;
-  border-bottom: 1px solid #F0E3B3;
-  color: #6B5B12;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-  padding: 9px 16px;
-}
-.account-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+/* ---------- Account dashboard ---------- */.account-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
 .account-head h1 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 700; letter-spacing: -.6px; }
 .account-head .sub { color: var(--gray); font-size: 15px; margin-top: 6px; }
 .acct-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }

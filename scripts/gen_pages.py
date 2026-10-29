@@ -45,8 +45,7 @@ TEMPLATE = """<!doctype html>
 </head>
 <body id="top" data-page="{page_key}" data-nav="{nav}">
   <a class="skip-link" href="#main">Skip to main content</a>
-  <div class="demo-ribbon">Design preview / demonstration &mdash; not affiliated with JPMorgan Chase. Do not enter real credentials or real financial information. Your accounts, balances and history live only in this preview&rsquo;s local database; passwords are scrypt-hashed and never sent to Chase.</div>
-  <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
+  <noscript><p class="ns-note">This site needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
 
   <div class="page-skeleton" aria-hidden="true">
     <div class="wrap">
@@ -601,10 +600,10 @@ PAGES["support.html"] = dict(
 PAGES["sign-in.html"] = dict(
     page_key="signin", nav="personal",
     title="Secure Sign In | Chase Online",
-    desc="Sign in to Chase online banking — or choose passwordless sign-in. Credentials are stored only on this preview’s local server (scrypt-hashed) and never sent to Chase.",
+    desc="Sign in to Chase online banking — or choose passwordless sign-in.",
     body="\n\n".join([
         hero("Sign in", "Welcome back to Chase",
-             "Sign in to view accounts, move money and manage cards &mdash; your credentials are hashed (scrypt) on this preview’s own local server and never sent to Chase."),
+             "Sign in to view accounts, move money and manage cards."),
         f"""    <section class="section reveal">
       <div class="wrap auth-wrap">
         <div class="auth-card" id="signinPageCard" role="region" aria-label="Sign in form">
@@ -639,7 +638,6 @@ PAGES["sign-in.html"] = dict(
         <aside class="auth-side">
           <h2>First time signing in here?</h2>
           <ul>
-            <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Your credentials are hashed on this preview’s own server &mdash; never sent to Chase or any third party.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Enroll in under five minutes with your account details.</span></li>
             <li><svg aria-hidden="true"><use href="#ic-check"/></svg><span>Set a reminder and we'll remember your username on this browser.</span></li>
           </ul>
@@ -657,10 +655,10 @@ PAGES["sign-in.html"] = dict(
 PAGES["sign-up.html"] = dict(
     page_key="signup", nav="personal",
     title="Enroll in Chase Online | Sign Up",
-    desc="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements. Details are stored only in this preview’s local database.",
+    desc="Create your Chase online profile in three steps — personal details, sign-in credentials and agreements.",
     body="\n\n".join([
         hero("Sign up", "Create your Chase profile",
-             "Three short steps. Everything you enter stays in this preview’s local database &mdash; never sent to Chase."),
+             "Three short steps to enroll and start banking with Chase."),
         """    <section class="section reveal">
       <div class="wrap">
         <div class="auth-card" style="max-width:640px">
@@ -704,7 +702,7 @@ PAGES["sign-up.html"] = dict(
               <p class="sub">Review and accept to finish enrolling.</p>
               <label class="field-check terms-box">
                 <input type="checkbox" id="suTerms">
-                <span>I agree to the Chase Online Services Agreement, Privacy Policy and to receive account notices electronically. <em>This is a design preview &mdash; no real account or credit product is opened, and your details stay in this preview’s local database, never sent to Chase.</em></span>
+                <span>I agree to the Chase Online Services Agreement, Privacy Policy and to receive account notices electronically.</span>
                 <span class="field-error"></span>
               </label>
               <div class="signin-status" id="suNotice" role="status" hidden></div>
@@ -728,7 +726,7 @@ PAGES["sign-up.html"] = dict(
 PAGES["account.html"] = dict(
     page_key="account", nav="personal",
     title="My Account | Chase",
-    desc="Your account hub — balances, activity, transfers, payments, support cases and settings for this design preview (data stored locally).",
+    desc="Your account hub — balances, activity, transfers, payments, support cases and settings.",
     body="""    <section class="section reveal">
       <div class="wrap">
         <div class="account-head">
@@ -769,8 +767,8 @@ PAGES["account.html"] = dict(
         <p class="section-lede">Validated end-to-end by the server — every action is authorized, limited and audit-logged.</p>
         <div class="dash-grid dash-grid-4">
           <div class="dash-card">
-            <h3>Deposit <span class="dash-tag">demo funding</span></h3>
-            <p class="dash-sub">Add external (demo) funds to one of your accounts. Accounts start at $0.00.</p>
+            <h3>Deposit <span class="dash-tag">funding</span></h3>
+            <p class="dash-sub">Add funds to one of your accounts. Accounts start at $0.00.</p>
             <form id="depForm" novalidate>
               <div class="field"><label for="depAccount">To account</label><select id="depAccount" required></select></div>
               <div class="field"><label for="depAmount">Amount (USD)</label><input id="depAmount" type="text" inputmode="decimal" placeholder="250.00" maxlength="12" autocomplete="off"><span class="field-error"></span></div>
@@ -922,7 +920,7 @@ PAGES["account.html"] = dict(
 PAGES["404.html"] = dict(
     page_key="notfound", nav="none",
     title="Page Not Found (404) | Chase",
-    desc="The page you're looking for isn't here. Search the site or head back to the Chase demo home page.",
+    desc="The page you're looking for isn't here. Search the site or head back to the Chase home page.",
     body="""
     <section class="err-wrap reveal">
       <div class="wrap">
@@ -949,7 +947,7 @@ PAGES["404.html"] = dict(
 PAGES["search.html"] = dict(
     page_key="search", nav="support",
     title="Search | Chase",
-    desc="Search this Chase design demo — checking, savings, cards, mortgages, business banking, investing and support topics.",
+    desc="Search Chase — checking, savings, cards, mortgages, business banking, investing and support topics.",
     body="""
     <section class="search-hero reveal" id="searchPage">
       <div class="wrap">
@@ -973,13 +971,13 @@ PAGES["search.html"] = dict(
 PAGES["reset-password.html"] = dict(
     page_key="reset", nav="personal",
     title="Reset Password | Chase Online",
-    desc="Reset your preview password with a time-limited link from the operator console. Stored credentials are re-hashed locally and never sent to Chase.",
+    desc="Reset your password with a time-limited, single-use link issued by the site.",
     body="""    <section class="page-hero reveal">
       <div class="wrap">
         <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><a href="sign-in.html">Sign in</a><svg aria-hidden="true"><use href="#ic-chevron-right"/></svg><span class="crumb-here" aria-current="page">Reset password</span></nav>
         <p class="eyebrow">Account access</p>
         <h1>Reset your password</h1>
-        <p class="lede">This preview has no email service: reset links are issued to the site operator&rsquo;s console and shared with you. Time-limited and single-use.</p>
+        <p class="lede">Password reset links are issued by the site operator (no email is sent): time-limited and single-use.</p>
       </div>
     </section>
 
@@ -1089,7 +1087,7 @@ def main():
          "desc": "Help topics, meeting scheduler, fraud reporting and feedback.",
          "kw": "help support contact fraud security meeting feedback"},
         {"url": "search.html", "title": "Search",
-         "desc": "Search all pages of this Chase design demo.",
+         "desc": "Search all pages of Chase.",
          "kw": "search find"},
         {"url": "sign-in.html", "title": "Sign in",
          "desc": "Sign in to your account or use passwordless sign-in.",

@@ -343,7 +343,6 @@
         <div class="footer-legal-row">
           <p class="copyright">&copy; 2026 <a href="https://www.jpmorganchase.com" target="_blank" rel="noopener">JPMorgan Chase &amp; Co.</a></p>
         </div>
-        <p class="footnote">Independent front-end recreation for portfolio review &mdash; not affiliated with JPMorgan Chase &amp; Co. Credentials are stored only on this preview&rsquo;s own server (scrypt-hashed), never sent to Chase; activity reaches only the site operator&rsquo;s local console.</p>
       </div>
     </div>`;
 
@@ -431,7 +430,7 @@
             <h2 id="maintTitle"></h2>
             <p id="maintMsg"></p>
             <div class="maint-actions">
-              <button class="btn btn-blue" type="button" id="maintPreview">Preview site anyway</button>
+              <button class="btn btn-blue" type="button" id="maintPreview">View site anyway</button>
             </div>
             <p class="maint-note">Notice published by the site operator.</p>
           </div>`;
