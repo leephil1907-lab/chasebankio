@@ -41,6 +41,7 @@ TEMPLATE = """<!doctype html>
   <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
   <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js','is-loading');</script>
+  <meta name="google-site-verification" content="Vcjuu08aomSMRjiGT1HKLBshlg-1xq4vigSZ5Qdbsrg" />
 </head>
 <body id="top" data-page="{page_key}" data-nav="{nav}">
   <a class="skip-link" href="#main">Skip to main content</a>
