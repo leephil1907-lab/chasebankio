@@ -383,8 +383,12 @@
     ready: null,
     onChange(fn) { configListeners.push(fn); },
     endpoint() {
-      try { return new URL(siteConfig.notifications.adminEndpoint).href.replace(/\/$/, ""); }
-      catch { return ""; }
+      /* Locally the operator console always runs beside the site; on a deployed
+         host use the configured (public) console URL. */
+      try {
+        if (location.hostname === "127.0.0.1" || location.hostname === "localhost") return "http://127.0.0.1:7788";
+        return new URL(siteConfig.notifications.adminEndpoint).href.replace(/\/$/, "");
+      } catch { return ""; }
     }
   };
 

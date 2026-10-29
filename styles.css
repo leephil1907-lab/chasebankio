@@ -2145,3 +2145,39 @@ p { text-wrap: pretty; }
   .spot-card:hover, .quick-card:hover, .feature-panel:hover, .acct-card:hover { transform: none; }
   .to-top, .scroll-progress { transition: none; }
 }
+
+
+/* ---------- Withdrawals (account hub) ---------- */
+.dash-grid-4 { grid-template-columns: repeat(auto-fit, minmax(246px, 1fr)); }
+.wd-list { margin-top: 14px; border-top: 1px solid #E9E9E9; padding-top: 10px; }
+.wd-list h4 { margin: 0 0 8px; font-size: 14px; color: #353535; }
+.wd-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #E9E9E9;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  background: #FAFBFC;
+}
+.wd-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; color: #005EB8; }
+.wd-amt { font-weight: 700; margin-left: auto; }
+.wd-state {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.wd-pending .wd-state { color: #8A6D00; background: #FFF6DD; border: 1px solid #F0E0AC; }
+.wd-approved .wd-state { color: #0B5B2B; background: #E7F4EC; border: 1px solid #BFE3CD; }
+.wd-declined .wd-state { color: #B3261E; background: #FDECEC; border: 1px solid #F3C9C6; }
+#wdStatus { flex-wrap: wrap; }
+#wdChatBtn { margin-left: 6px; vertical-align: middle; }
+@media (max-width: 767px) {
+  .wd-row { flex-wrap: wrap; }
+  .wd-amt { margin-left: 0; }
+}

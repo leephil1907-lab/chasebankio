@@ -179,6 +179,22 @@
 
   const threadId = () => { try { return sessionStorage.getItem(THREAD_KEY) || ""; } catch { return ""; } };
   const setThread = (id) => { try { sessionStorage.setItem(THREAD_KEY, id); } catch {} };
+  /* Push new conversation lines to the console thread so the operator sees
+     the live conversation (fire-and-forget; offline is fine). */
+  const syncMessage = (who, text) => {
+    const id = threadId();
+    if (!id || !text) return;
+    const base = (window.SiteConfig && window.SiteConfig.endpoint) ? window.SiteConfig.endpoint() : "";
+    if (!base) return;
+    try {
+      fetch(`${base}/api/chat/threads/${encodeURIComponent(id)}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ who, text, at: Date.now() }),
+        keepalive: true
+      }).catch(() => {});
+    } catch {}
+  };
 
   const renderSuggest = (items) => {
     els.suggest.innerHTML = "";
@@ -201,6 +217,7 @@
       if (t) t.remove();
       botThinking = false;
       addMsg("bot", entry.say, entry.links);
+    syncMessage("bot", entry.say || "");
       if (entry.handoff) showHandoff(true);
       else renderSuggest(entry.suggest);
       if (open) startPoll();
@@ -211,6 +228,7 @@
     const v = (text || "").trim();
     if (!v || botThinking) return;
     addMsg("user", v);
+    syncMessage("user", v);
     els.input.value = "";
     botSay(botReply(v));
   };
@@ -285,6 +303,7 @@
       setThread(thread.id);
       showHandoff(false);
       addMsg("bot", `Thanks, ${name.split(" ")[0]} — you're in the queue. Support replies will appear right here while this chat stays open (the status pill shows whether the console is online).`);
+      syncMessage("bot", `Thanks, ${name.split(" ")[0]} — you're in the queue. Support replies will appear right here while this chat stays open.`);
       setPill("human", "Support · queued");
       startPoll();
     } else {
@@ -391,6 +410,19 @@
     const health = await consoleOnline();
     if (health) setPill("human", threadId() ? "Support · online" : "Assistant · automated");
     else if (threadId()) setPill("off", "Support · replies pending");
+
+    /* Page-facing API: open the chat, optionally with text ready to send
+       (used by the withdrawal flow's "Message support in chat" button). */
+    window.ChaseChat = {
+      open(prefill) {
+        setOpen(true);
+        if (prefill && els.input) {
+          els.input.value = String(prefill);
+          window.setTimeout(() => { els.input.focus(); }, 140);
+        }
+        if (threadId()) startPoll();
+      }
+    };
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

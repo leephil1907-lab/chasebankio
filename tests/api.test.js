@@ -58,8 +58,8 @@ const cookieOf = (res) => String(res.headers["set-cookie"] || "").split(";")[0];
   /* ---------------- health & migrations ---------------- */
   let res = await R("GET", "/api/health");
   eq(res.status, 200, "health 200");
-  eq(res.data.schema, 2, "schema v2");
-  eq(res.data.migrations.length, 2, "both migrations recorded");
+  eq(res.data.schema, 3, "schema v3");
+  eq(res.data.migrations.length, 3, "all migrations recorded");
 
   /* ---------------- static & headers ---------------- */
   res = await R("GET", "/index.html");
@@ -262,6 +262,43 @@ const cookieOf = (res) => String(res.headers["set-cookie"] || "").split(";")[0];
   eq(res.status, 401, "balance endpoint token-gated");
   res = await R("POST", `/api/admin/users/${aliceRow.id}/balance`, { headers: { "x-admin-token": cfg.adminToken }, body: { accountId: "ac_none", mode: "credit", amount: "1" } });
   eq(res.status, 404, "unknown account rejected");
+
+  /* withdrawal tickets: request → admin approve/decline → ledger */
+  res = await R("POST", "/api/withdrawals", { cookie: aliceCookie, body: { accountId: balAcct.id, amount: "99999" } });
+  eq(res.status, 400, "withdraw over balance rejected");
+  res = await R("POST", "/api/withdrawals", { cookie: aliceCookie, body: { accountId: balAcct.id, amount: "2.00" } });
+  eq(res.status, 201, "withdrawal request created");
+  const wdId = res.data.request.id;
+  check(/^WD-\d{4}$/.test(wdId), "ticket id format WD-0001", wdId);
+  eq(res.data.request.status, "pending", "request starts pending");
+  check(typeof res.data.chatText === "string" && res.data.chatText.includes(wdId), "chat confirmation text carries ticket");
+  res = await R("GET", "/api/withdrawals", { cookie: aliceCookie });
+  check(res.data.requests.some((w) => w.id === wdId && w.status === "pending"), "user sees own pending ticket");
+  res = await R("GET", "/api/admin/withdrawals", { headers: { "x-admin-token": cfg.adminToken } });
+  eq(res.status, 200, "admin withdrawal list");
+  const wdRow = res.data.requests.find((w) => w.id === wdId);
+  check(!!wdRow && wdRow.username === "aliceok" && !!wdRow.account, "admin row joined with user + account");
+  res = await R("POST", "/api/admin/withdrawals", { headers: { "x-admin-token": cfg.adminToken } });
+  eq(res.status, 404, "withdrawal admin route shape");
+  res = await R("POST", `/api/admin/withdrawals/${wdId}/approve`, { body: {} });
+  eq(res.status, 401, "approve token-gated");
+  res = await R("POST", `/api/admin/withdrawals/${wdId}/approve`, { headers: { "x-admin-token": cfg.adminToken } });
+  eq(res.status, 200, "approve accepted");
+  eq(res.data.account.balanceCents, 300, "approve debited $5.00 → $3.00");
+  eq(res.data.transaction.type, "withdrawal", "approve wrote withdrawal txn");
+  eq(res.data.transaction.amountCents, -200, "withdrawal txn is a signed debit");
+  eq(res.data.transaction.balanceAfterCents, 300, "running balance exact after approval");
+  res = await R("POST", `/api/admin/withdrawals/${wdId}/approve`, { headers: { "x-admin-token": cfg.adminToken } });
+  eq(res.status, 409, "double approve rejected");
+  res = await R("POST", "/api/withdrawals", { cookie: aliceCookie, body: { accountId: balAcct.id, amount: "1.00" } });
+  const wd2 = res.data.request.id;
+  res = await R("POST", `/api/admin/withdrawals/${wd2}/decline`, { headers: { "x-admin-token": cfg.adminToken }, body: { reason: "needs identity check" } });
+  eq(res.status, 200, "decline accepted");
+  eq(res.data.request.status, "declined", "declined ticket recorded");
+  res = await R("GET", "/api/accounts", { cookie: aliceCookie });
+  eq(res.data.accounts.find((a) => a.id === balAcct.id).balanceCents, 300, "decline moved no money");
+  res = await R("GET", "/api/transactions?limit=50", { cookie: aliceCookie });
+  check(res.data.transactions.some((x) => x.type === "withdrawal" && x.label.includes(wdId)), "customer sees approved withdrawal in activity");
 
   res = await R("PATCH", `/api/admin/cases/${aliceCase.id}`, { headers: { "x-admin-token": cfg.adminToken }, body: { message: "Your statement lives in Account hub → Activity.", status: "pending" } });
   eq(res.status, 200, "admin replies to case");

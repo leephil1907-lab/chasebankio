@@ -63,26 +63,34 @@ function clearSessionCookie(res) {
   res.setHeader("Set-Cookie", "chase_sid=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
 }
 
+/* Best-effort server→console posts (events, chat threads). Never blocks the
+   user; resolve:true only when the console actually acknowledged. */
+function forwardToConsole(cfg, path, payload, timeoutMs) {
+  if (!cfg.consoleUrl) return Promise.resolve(false);
+  const body = JSON.stringify(payload);
+  return new Promise((resolve) => {
+    try {
+      const u = new URL(cfg.consoleUrl.replace(/\/$/, "") + path);
+      const mod = u.protocol === "https:" ? require("https") : require("http");
+      const req = mod.request({
+        hostname: u.hostname, port: u.port || (u.protocol === "https:" ? 443 : 80),
+        path: u.pathname, method: "POST",
+        headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
+        timeout: timeoutMs || 1500,
+      }, (r) => { r.resume(); resolve(r.statusCode >= 200 && r.statusCode < 300); });
+      req.on("error", () => resolve(false));
+      req.on("timeout", () => { req.destroy(); resolve(false); });
+      req.end(body);
+    } catch { resolve(false); }
+  });
+}
+
 /* Best-effort server→console event forwarding (no email is ever claimed). */
 function forwardEvent(cfg, type, payload, page) {
-  if (!cfg.consoleUrl) return;
-  const body = JSON.stringify({
+  return forwardToConsole(cfg, "/api/events", {
     type, payload, page: page || "", visitor: "server",
     ts: Date.now(), read: false,
   });
-  try {
-    const u = new URL(cfg.consoleUrl.replace(/\/$/, "") + "/api/events");
-    const mod = u.protocol === "https:" ? require("https") : require("http");
-    const req = mod.request({
-      hostname: u.hostname, port: u.port || (u.protocol === "https:" ? 443 : 80),
-      path: u.pathname, method: "POST",
-      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
-      timeout: 1500,
-    }, (r) => r.resume());
-    req.on("error", () => {});
-    req.on("timeout", () => req.destroy());
-    req.end(body);
-  } catch { /* console offline — never blocks the user */ }
 }
 
 function processDuePayments(db, cfg) {
@@ -746,6 +754,146 @@ on("GET", "/api/health", (ctx) => {
   });
 });
 
+/* =================== WITHDRAWALS (operator approval) =================== */
+/* User requests → ticket WD-0001 (no money moves). Admin approves → signed
+   debit ledger row; declines → ticket closed, no ledger change. The request
+   is pushed to the console as a chat thread + event so it shows up instantly. */
+const wdPublic = (w) => ({
+  id: w.id, userId: w.userId, accountId: w.accountId, amountCents: w.amountCents,
+  status: w.status, note: w.note || "", createdAt: w.createdAt,
+  decidedAt: w.decidedAt || null, decidedBy: w.decidedBy || "", reason: w.reason || "",
+});
+
+on("GET", "/api/withdrawals", needAuth((ctx) => {
+  const rows = ctx.db.coll("withdrawals")
+    .filter((w) => w.userId === ctx.user.id)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+    .map(wdPublic);
+  json(ctx.res, 200, { requests: rows });
+}));
+
+on("POST", "/api/withdrawals", needAuth(async (ctx) => {
+  const l = limit(ctx, "withdrawal", 10, 3600e3); if (l) return l;
+  const user = ctx.user;
+  const db = ctx.db;
+  const b = V.pick(ctx.body || {}, ["accountId", "amount"]);
+  const acct = db.coll("accounts").find((a) => a.id === b.accountId && a.userId === user.id);
+  if (!acct) return err(ctx.res, 404, "no_account", "Account not found.");
+  if (acct.status !== "open") return err(ctx.res, 409, "account_closed", "This account is not open.");
+  if (acct.balanceCents < 1) return err(ctx.res, 400, "no_balance", "This account has no balance to withdraw.");
+  const amountCents = V.cents(b.amount, { name: "Withdrawal amount", min: 1, maxCents: acct.balanceCents });
+  const id = "WD-" + String(db.nextSeq("withdrawal")).padStart(4, "0");
+  const now = new Date().toISOString();
+  const amountStr = "$" + (amountCents / 100).toFixed(2);
+  const rec = {
+    id, userId: user.id, accountId: acct.id, amountCents,
+    status: "pending", note: "", createdAt: now, decidedAt: null, decidedBy: "", reason: "",
+  };
+  db.coll("withdrawals").push(rec);
+  db.save();
+  audit(db, ctx, {
+    action: "withdrawal.request", target: `${user.username}/${id}`,
+    detail: `${amountStr} from ${acct.type} ••••${acct.last4}`,
+  });
+
+  /* Best-effort: open a console chat thread carrying the ticket so the
+     operator sees the request instantly in Live chat. */
+  const chatText = `Hi, I'd like to complete my withdrawal request ${id} for ${amountStr}.`;
+  let threadId = "";
+  const full = db.coll("users").find((u) => u.id === user.id);
+  if (ctx.cfg.consoleUrl && full) {
+    const tid = `th_wd_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const ok = await forwardToConsole(ctx.cfg, "/api/chat/threads", {
+      id: tid, name: full.name, contact: full.email || full.username,
+      note: `Withdrawal request ${id} — ${amountStr} from ${acct.name} ••••${acct.last4}. Awaiting customer confirmation in chat.`,
+      visitor: "server", page: "account.html", transcript: [], status: "open",
+      ts: now,
+    }, 2500);
+    if (ok) threadId = tid;
+  }
+  forwardEvent(ctx.cfg, "withdrawal_request", {
+    id, username: user.username, name: user.name, amount: amountStr,
+    account: `${acct.name} ••••${acct.last4}`,
+  }, "account.html");
+  json(ctx.res, 201, { request: wdPublic(rec), threadId, chatText });
+}));
+
+on("GET", "/api/admin/withdrawals", needAdmin((ctx) => {
+  const db = ctx.db;
+  const requests = db.coll("withdrawals").map((w) => {
+    const u = db.coll("users").find((x) => x.id === w.userId);
+    const a = db.coll("accounts").find((x) => x.id === w.accountId);
+    return {
+      ...wdPublic(w),
+      username: u ? u.username : "?",
+      name: u ? u.name : "?",
+      account: a ? { type: a.type, name: a.name, last4: a.last4, balanceCents: a.balanceCents, status: a.status } : null,
+    };
+  }).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  json(ctx.res, 200, { requests });
+}));
+
+on("POST", "/api/admin/withdrawals/:id/approve", needAdmin((ctx) => {
+  const db = ctx.db;
+  const w = db.coll("withdrawals").find((x) => x.id === ctx.params.id);
+  if (!w) return err(ctx.res, 404, "no_request", "Withdrawal request not found.");
+  if (w.status !== "pending") return err(ctx.res, 409, "already_decided", `This request is already ${w.status}.`);
+  const acct = db.coll("accounts").find((a) => a.id === w.accountId && a.userId === w.userId);
+  if (!acct || acct.status !== "open") return err(ctx.res, 409, "account_closed", "The account is no longer open.");
+  if (acct.balanceCents < w.amountCents)
+    return err(ctx.res, 400, "insufficient_funds", `Only $${(acct.balanceCents / 100).toFixed(2)} available — approve declined.`);
+  const user = db.coll("users").find((u) => u.id === w.userId);
+  const amountStr = "$" + (w.amountCents / 100).toFixed(2);
+  acct.balanceCents -= w.amountCents;
+  const txn = {
+    id: uid("t"), userId: w.userId, accountId: acct.id,
+    ts: new Date().toISOString(), type: "withdrawal", status: "completed",
+    label: `Withdrawal approved — ${w.id}`, memo: "Approved by operator",
+    amountCents: -w.amountCents, balanceAfterCents: acct.balanceCents,
+    counterparty: "External (approved)",
+  };
+  db.coll("txns").push(txn);
+  w.status = "approved";
+  w.decidedAt = txn.ts;
+  w.decidedBy = "operator";
+  db.save();
+  audit(db, ctx, {
+    actorType: "admin", actorName: "operator-console",
+    action: "admin.withdrawal.approve", target: `${w.id}/${acct.id}`,
+    detail: `${amountStr} debited (${(acct.balanceCents / 100).toFixed(2)} now) for ${user ? user.username : w.userId}`,
+  });
+  forwardEvent(ctx.cfg, "withdrawal_approved", {
+    id: w.id, username: user ? user.username : w.userId, amount: amountStr,
+    account: `${acct.name} ••••${acct.last4}`,
+  }, "account.html");
+  json(ctx.res, 200, { request: wdPublic(w), account: acctPublic(acct), transaction: txn });
+}));
+
+on("POST", "/api/admin/withdrawals/:id/decline", needAdmin((ctx) => {
+  const db = ctx.db;
+  const w = db.coll("withdrawals").find((x) => x.id === ctx.params.id);
+  if (!w) return err(ctx.res, 404, "no_request", "Withdrawal request not found.");
+  if (w.status !== "pending") return err(ctx.res, 409, "already_decided", `This request is already ${w.status}.`);
+  const b = ctx.body || {};
+  const reason = b.reason ? V.str(b.reason, { max: 140, name: "Reason" }) : "";
+  const user = db.coll("users").find((u) => u.id === w.userId);
+  const amountStr = "$" + (w.amountCents / 100).toFixed(2);
+  w.status = "declined";
+  w.decidedAt = new Date().toISOString();
+  w.decidedBy = "operator";
+  w.reason = reason;
+  db.save();
+  audit(db, ctx, {
+    actorType: "admin", actorName: "operator-console",
+    action: "admin.withdrawal.decline", target: w.id,
+    detail: `${amountStr} declined${reason ? " · " + reason : ""} for ${user ? user.username : w.userId}`,
+  });
+  forwardEvent(ctx.cfg, "withdrawal_declined", {
+    id: w.id, username: user ? user.username : w.userId, amount: amountStr, reason,
+  }, "account.html");
+  json(ctx.res, 200, { request: wdPublic(w) });
+}));
+
 /* ------------------------- dispatch ------------------------- */
 function dispatch(ctx) {
   for (const r of routes) {
@@ -755,7 +903,14 @@ function dispatch(ctx) {
     ctx.params = {};
     r.keys.forEach((k, i) => { ctx.params[k] = decodeURIComponent(m[i + 1]); });
     try {
-      r.handler(ctx);
+      const out = r.handler(ctx);
+      if (out && typeof out.then === "function") {
+        out.catch((e) => {
+          const status = e.status || 500;
+          if (status >= 500) console.error("[api]", e);
+          if (!ctx.res.headersSent) err(ctx.res, status, e.code || "error", e.message || "Something went wrong.");
+        });
+      }
       return true; /* the handler owns the response, even if it returned undefined */
     } catch (e) {
       const status = e.status || 500;

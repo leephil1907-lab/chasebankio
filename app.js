@@ -544,7 +544,7 @@
   const fillSelects = () => {
     const open = accountsCache.filter((a) => a.status === "open");
     const opts = open.map((a) => `<option value="${a.id}">${esc(acctLabel(a))} \u2014 ${fmt(a.balanceCents)}</option>`).join("");
-    ["#depAccount", "#trFrom", "#trTo", "#payFrom"].forEach((sel) => { const el = $(sel); if (el) el.innerHTML = opts; });
+    ["#depAccount", "#trFrom", "#trTo", "#payFrom", "#wdAccount"].forEach((sel) => { const el = $(sel); if (el) el.innerHTML = opts; });
     const to = $("#trTo");
     if (to && to.options.length > 1) to.selectedIndex = 1;
   };
@@ -951,6 +951,80 @@
     if (more) more.addEventListener("click", () => { txnShowAll = !txnShowAll; loadTxns(); });
   };
 
+  /* ================================================================
+     9b. Withdrawals — ticket request, chat confirmation, live watch
+     ================================================================ */
+  let wdPendingNow = false, wdWatch = null, wdSig = "";
+  const renderWdList = (rows) => {
+    const box = $("#wdList");
+    if (!box) return;
+    if (!rows.length) { box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    box.innerHTML = `<h4>Your withdrawal requests</h4>` + rows.map((w) => `
+      <div class="wd-row wd-${esc(w.status)}">
+        <span class="wd-id">${esc(w.id)}</span>
+        <span class="wd-amt">${fmt(w.amountCents)}</span>
+        <span class="wd-state">${esc(w.status)}${w.status === "declined" && w.reason ? ` &middot; ${esc(w.reason)}` : ""}</span>
+      </div>`).join("");
+  };
+  const loadWithdrawals = async () => {
+    try {
+      const d = await api("/api/withdrawals");
+      const rows = d.requests || [];
+      renderWdList(rows);
+      wdPendingNow = rows.some((w) => w.status === "pending");
+      const sig = rows.map((w) => w.id + ":" + w.status).join(",");
+      const changed = sig !== wdSig && wdSig !== "";
+      wdSig = sig;
+      return { changed, pending: wdPendingNow };
+    } catch { return { changed: false, pending: wdPendingNow }; }
+  };
+  const stopWdWatch = () => { if (wdWatch) { window.clearInterval(wdWatch); wdWatch = null; } };
+  const startWdWatch = () => {
+    if (wdWatch) return;
+    wdWatch = window.setInterval(async () => {
+      const s = await loadWithdrawals();
+      if (s.changed) refreshDash();
+      if (!s.pending) stopWdWatch();
+    }, 6000);
+  };
+  const initWithdrawals = () => {
+    const form = $("#wdForm");
+    if (!form) return;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amt = $("#wdAmount"), st = $("#wdStatus");
+      amt.closest(".field").classList.remove("invalid");
+      if (!amtOk(amt.value) || parseFloat(amt.value) <= 0) {
+        amt.closest(".field").classList.add("invalid");
+        amt.closest(".field").querySelector(".field-error").textContent = "Enter an amount like 50.00.";
+        amt.focus();
+        return;
+      }
+      const btn = form.querySelector("button[type=submit]");
+      busy(btn, true, "Requesting\u2026");
+      try {
+        const d = await api("/api/withdrawals", { method: "POST", body: {
+          accountId: $("#wdAccount").value, amount: amt.value.trim(),
+        }});
+        if (d.threadId) { try { sessionStorage.setItem("chase_chat_thread", d.threadId); } catch {} }
+        setSt(st, "ok", `Withdrawal request ${d.request.id} for ${fmt(d.request.amountCents)} created. Message customer support in the chat to complete it \u2014 your ticket is ready.`);
+        if (st) {
+          st.insertAdjacentHTML("beforeend", ` <button type="button" class="btn btn-outline btn-small" id="wdChatBtn">Message support in chat</button>`);
+          const cb = $("#wdChatBtn");
+          if (cb) cb.addEventListener("click", () => {
+            if (window.ChaseChat) window.ChaseChat.open(d.chatText);
+          });
+        }
+        form.reset();
+        await loadWithdrawals();
+        startWdWatch();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+    loadWithdrawals().then((s) => { if (s && s.pending) startWdWatch(); });
+  };
+
   const initAccountPage = async () => {
     if (!currentUser) { window.location.replace("sign-in.html?next=account"); return; }
     $$("[data-greeting]").forEach((el) => { el.textContent = `Welcome, ${firstName(currentUser)}`; });
@@ -971,6 +1045,7 @@
     loadPayees();
     loadPayments();
     loadCases();
+    initWithdrawals();
   };
 
   /* ================================================================
