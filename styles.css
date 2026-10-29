@@ -2181,3 +2181,32 @@ p { text-wrap: pretty; }
   .wd-row { flex-wrap: wrap; }
   .wd-amt { margin-left: 0; }
 }
+
+/* ---------- Invoices (account hub) ---------- */
+.inv-row {
+  background: #fff;
+  border: 1px solid #E9E9E9;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(19,19,19,.05);
+}
+.inv-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.inv-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #005EB8; font-size: 15px; }
+.inv-state {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  border-radius: 999px; padding: 3px 9px;
+}
+.inv-open .inv-state { color: #8A6D00; background: #FFF6DD; border: 1px solid #F0E0AC; }
+.inv-paid .inv-state { color: #0B5B2B; background: #E7F4EC; border: 1px solid #BFE3CD; }
+.inv-voided .inv-state { color: #565a5d; background: #F1F1F0; border: 1px solid #E9E9E9; }
+.inv-total { margin-left: auto; font-weight: 700; font-size: 17px; }
+.inv-meta { color: #565a5d; font-size: 13px; margin-top: 5px; }
+.inv-items { list-style: none; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px dashed #E9E9E9; }
+.inv-items li { display: flex; justify-content: space-between; gap: 14px; font-size: 13.5px; padding: 4px 0; color: #353535; }
+.inv-items li span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-actions { margin-top: 12px; }
+.inv-pay { margin-top: 12px; padding: 14px; background: #FAFBFC; border: 1px solid #E9E9E9; border-radius: 10px; display: grid; gap: 10px; }
+.inv-pay[hidden] { display: none; }
+.inv-pay .field { margin: 0; }
+.inv-pay-btns { display: flex; align-items: center; gap: 12px; }

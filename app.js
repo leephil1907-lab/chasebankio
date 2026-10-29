@@ -1025,6 +1025,106 @@
     loadWithdrawals().then((s) => { if (s && s.pending) startWdWatch(); });
   };
 
+  /* ================================================================
+     9c. Invoices — operator-issued bills payable from the dashboard
+     ================================================================ */
+  let invWatch = null, invSig = "", invOpen = false;
+  const renderInvoices = (rows) => {
+    const box = $("#invoicesList");
+    if (!box) return;
+    if (!rows.length) {
+      box.innerHTML = `<p class="muted">No invoices yet \u2014 when support sends you one it appears here with its line items and a Pay button.</p>`;
+      return;
+    }
+    box.innerHTML = rows.map((v) => `
+      <div class="inv-row inv-${esc(v.status)}">
+        <div class="inv-head">
+          <strong class="inv-id">${esc(v.id)}</strong>
+          <span class="inv-state">${esc(v.status)}</span>
+          <span class="inv-total">${fmt(v.totalCents)}</span>
+        </div>
+        <div class="inv-meta">Sent by ${esc(v.sentBy || "operator")}${v.dueDate ? ` &middot; due ${esc(v.dueDate)}` : ""}${v.paidAt ? ` &middot; paid ${dtime(v.paidAt)}` : ""}${v.notes ? ` &middot; ${esc(v.notes)}` : ""}</div>
+        <ul class="inv-items">${(v.items || []).map((it) => `<li><span>${esc(it.desc)}</span><span>${fmt(it.amountCents)}</span></li>`).join("")}</ul>
+        ${v.status === "open" ? `
+        <div class="inv-actions"><button type="button" class="btn btn-blue btn-small" data-inv-pay="${esc(v.id)}">Pay invoice</button></div>
+        <form class="inv-pay" data-inv-form="${esc(v.id)}" hidden novalidate>
+          <div class="field"><label>From account</label><select data-inv-acct required></select></div>
+          <div class="field"><label>Confirm with your password</label><input type="password" data-inv-pw maxlength="64" autocomplete="current-password"><span class="field-error"></span></div>
+          <div class="form-status" data-inv-status role="status" hidden></div>
+          <div class="inv-pay-btns">
+            <button class="btn btn-blue btn-small" type="submit">Confirm &amp; pay ${fmt(v.totalCents)}</button>
+            <button type="button" class="link-quiet" data-inv-cancel>Cancel</button>
+          </div>
+        </form>` : ""}
+      </div>`).join("");
+    const open = accountsCache.filter((a) => a.status === "open");
+    const opts = open.map((a) => `<option value="${a.id}">${esc(acctLabel(a))} \u2014 ${fmt(a.balanceCents)}</option>`).join("");
+    box.querySelectorAll("[data-inv-acct]").forEach((sel) => { sel.innerHTML = opts; });
+  };
+  const loadInvoices = async () => {
+    try {
+      const d = await api("/api/invoices");
+      const rows = d.invoices || [];
+      renderInvoices(rows);
+      invOpen = rows.some((v) => v.status === "open");
+      const sig = rows.map((v) => v.id + ":" + v.status).join(",");
+      const changed = sig !== invSig && invSig !== "";
+      invSig = sig;
+      return { changed, open: invOpen };
+    } catch { return { changed: false, open: invOpen }; }
+  };
+  const stopInvWatch = () => { if (invWatch) { window.clearInterval(invWatch); invWatch = null; } };
+  const startInvWatch = () => {
+    if (invWatch) return;
+    invWatch = window.setInterval(async () => {
+      const s = await loadInvoices();
+      if (s.changed) refreshDash();
+      if (!s.open) stopInvWatch();
+    }, 6000);
+  };
+  const initInvoices = () => {
+    const box = $("#invoicesList");
+    if (!box) return;
+    box.addEventListener("click", (e) => {
+      const pay = e.target.closest("[data-inv-pay]");
+      if (pay) {
+        const form = box.querySelector(`[data-inv-form="${pay.dataset.invPay}"]`);
+        if (form) { form.hidden = !form.hidden; if (!form.hidden) { const s = form.querySelector("[data-inv-acct]"); if (s) s.focus(); } }
+        return;
+      }
+      const cancel = e.target.closest("[data-inv-cancel]");
+      if (cancel) {
+        const form = cancel.closest(".inv-pay");
+        if (form) form.hidden = true;
+      }
+    });
+    box.addEventListener("submit", async (e) => {
+      const form = e.target.closest(".inv-pay");
+      if (!form) return;
+      e.preventDefault();
+      const id = form.dataset.invForm;
+      const st = form.querySelector("[data-inv-status]");
+      const pw = form.querySelector("[data-inv-pw]");
+      const f = pw.closest(".field");
+      f.classList.remove("invalid");
+      if (!pw.value) { f.classList.add("invalid"); f.querySelector(".field-error").textContent = "Enter your password to confirm."; pw.focus(); return; }
+      const btn = form.querySelector("button[type=submit]");
+      busy(btn, true, "Paying\u2026");
+      try {
+        const d = await api(`/api/invoices/${encodeURIComponent(id)}/pay`, { method: "POST", body: {
+          accountId: form.querySelector("[data-inv-acct]").value, confirmPassword: pw.value,
+        }});
+        setSt(st, "ok", `Invoice ${id} paid \u2014 new balance in ${d.account.name}: ${fmt(d.account.balanceCents)}.`);
+        showToast(`Invoice ${id} paid.`);
+        refreshDash();
+        await loadInvoices();
+        startInvWatch();
+      } catch (err) { setSt(st, "error", err.message); }
+      busy(btn, false);
+    });
+    loadInvoices().then((s) => { if (s && s.open) startInvWatch(); });
+  };
+
   const initAccountPage = async () => {
     if (!currentUser) { window.location.replace("sign-in.html?next=account"); return; }
     $$("[data-greeting]").forEach((el) => { el.textContent = `Welcome, ${firstName(currentUser)}`; });
@@ -1046,6 +1146,7 @@
     loadPayments();
     loadCases();
     initWithdrawals();
+    initInvoices();
   };
 
   /* ================================================================

@@ -44,6 +44,7 @@ TEMPLATE = """<!doctype html>
 </head>
 <body id="top" data-page="{page_key}" data-nav="{nav}">
   <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="demo-ribbon">Design preview / demonstration &mdash; not affiliated with JPMorgan Chase. Do not enter real credentials or real financial information. Your accounts, balances and history live only in this preview&rsquo;s local database; passwords are scrypt-hashed and never sent to Chase.</div>
   <noscript><p class="ns-note">This preview needs JavaScript for navigation. <a href="index.html">Return to the home page</a>.</p></noscript>
 
   <div class="page-skeleton" aria-hidden="true">
@@ -727,8 +728,7 @@ PAGES["account.html"] = dict(
     page_key="account", nav="personal",
     title="My Account | Chase",
     desc="Your account hub — balances, activity, transfers, payments, support cases and settings for this design preview (data stored locally).",
-    body="""    <div class="demo-ribbon">Design preview &mdash; not affiliated with JPMorgan Chase. Your accounts, balances and history live only in this preview&rsquo;s local database; passwords are scrypt-hashed and never sent to Chase.</div>
-    <section class="section reveal">
+    body="""    <section class="section reveal">
       <div class="wrap">
         <div class="account-head">
           <div>
@@ -837,6 +837,16 @@ PAGES["account.html"] = dict(
         <p class="section-lede">Scheduled, completed and failed payments with their current status.</p>
         <div class="txn-list" id="paymentsList" aria-live="polite">
           <p class="muted">Loading payments&hellip;</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" aria-labelledby="invoicesTitle" id="invoices">
+      <div class="wrap">
+        <h2 class="section-title" id="invoicesTitle">Invoices</h2>
+        <p class="section-lede">Invoices sent to you by the operator &mdash; review the line items and pay one straight from your account.</p>
+        <div class="txn-list" id="invoicesList" aria-live="polite">
+          <p class="muted">Loading invoices&hellip;</p>
         </div>
       </div>
     </section>

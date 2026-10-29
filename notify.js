@@ -53,6 +53,12 @@
   };
 
   const attempt = async (event) => {
+    /* Chat traffic goes to the console's thread endpoints so offline
+       conversations still arrive as a real, readable thread. */
+    if (event.type === "chat_message" && event.payload)
+      return await post(`/api/chat/threads/${encodeURIComponent(event.payload.id)}/messages`, event.payload), "sent";
+    if (event.type === "chat_handoff" && event.payload)
+      return await post("/api/chat/threads", event.payload), "sent";
     await post("/api/events", event);
     return "sent";
   };

@@ -58,8 +58,8 @@ const cookieOf = (res) => String(res.headers["set-cookie"] || "").split(";")[0];
   /* ---------------- health & migrations ---------------- */
   let res = await R("GET", "/api/health");
   eq(res.status, 200, "health 200");
-  eq(res.data.schema, 3, "schema v3");
-  eq(res.data.migrations.length, 3, "all migrations recorded");
+  eq(res.data.schema, 4, "schema v4");
+  eq(res.data.migrations.length, 4, "all migrations recorded");
 
   /* ---------------- static & headers ---------------- */
   res = await R("GET", "/index.html");
@@ -299,6 +299,39 @@ const cookieOf = (res) => String(res.headers["set-cookie"] || "").split(";")[0];
   eq(res.data.accounts.find((a) => a.id === balAcct.id).balanceCents, 300, "decline moved no money");
   res = await R("GET", "/api/transactions?limit=50", { cookie: aliceCookie });
   check(res.data.transactions.some((x) => x.type === "withdrawal" && x.label.includes(wdId)), "customer sees approved withdrawal in activity");
+
+  /* invoices: operator sends → customer pays with step-up → ledger */
+  res = await R("POST", "/api/admin/invoices", { headers: { "x-admin-token": cfg.adminToken }, body: { userId: aliceRow.id, items: [{ desc: "Plan fee", amount: "2.00" }], dueDate: "2026-12-01", notes: "Test invoice" } });
+  eq(res.status, 201, "invoice sent");
+  const invId = res.data.invoice.id;
+  check(/^INV-\d{4}$/.test(invId), "invoice id format INV-0001", invId);
+  eq(res.data.invoice.totalCents, 200, "invoice total computed from lines");
+  eq(res.data.invoice.status, "open", "invoice starts open");
+  res = await R("GET", "/api/invoices", { cookie: aliceCookie });
+  check(res.data.invoices.some((v) => v.id === invId && v.status === "open"), "customer sees open invoice on dashboard");
+  res = await R("POST", `/api/invoices/${invId}/pay`, { cookie: aliceCookie, body: { accountId: balAcct.id, confirmPassword: "wrong" } });
+  eq(res.status, 403, "invoice pay requires step-up password");
+  res = await R("POST", `/api/invoices/${invId}/pay`, { cookie: aliceCookie, body: { accountId: balAcct.id, confirmPassword: "Sup3rSecret!" } });
+  eq(res.status, 200, "invoice paid");
+  eq(res.data.account.balanceCents, 100, "$3.00 → $1.00 after paying $2.00");
+  eq(res.data.transaction.type, "invoice", "invoice payment wrote ledger row");
+  eq(res.data.transaction.amountCents, -200, "invoice txn is a signed debit");
+  res = await R("POST", `/api/invoices/${invId}/pay`, { cookie: aliceCookie, body: { accountId: balAcct.id, confirmPassword: "Sup3rSecret!" } });
+  eq(res.status, 409, "double pay rejected");
+  res = await R("POST", "/api/admin/invoices", { headers: { "x-admin-token": cfg.adminToken }, body: { userId: aliceRow.id, items: [{ desc: "Big fee", amount: "50.00" }] } });
+  const inv2 = res.data.invoice.id;
+  res = await R("POST", `/api/invoices/${inv2}/pay`, { cookie: aliceCookie, body: { accountId: balAcct.id, confirmPassword: "Sup3rSecret!" } });
+  eq(res.status, 400, "invoice pay insufficient funds rejected");
+  res = await R("POST", `/api/admin/invoices/${inv2}/void`, { headers: { "x-admin-token": cfg.adminToken } });
+  eq(res.status, 200, "invoice cancelled");
+  res = await R("POST", `/api/invoices/${inv2}/pay`, { cookie: aliceCookie, body: { accountId: balAcct.id, confirmPassword: "Sup3rSecret!" } });
+  eq(res.status, 409, "cancelled invoice unpayable");
+  res = await R("POST", "/api/admin/invoices", { headers: { "x-admin-token": cfg.adminToken }, body: { userId: aliceRow.id, items: [{ desc: "Bad", amount: "0" }] } });
+  eq(res.status, 400, "zero-value line rejected");
+  res = await R("GET", "/api/admin/invoices", { headers: { "x-admin-token": cfg.adminToken } });
+  check(res.data.invoices.some((v) => v.id === invId && v.status === "paid"), "admin sees paid invoice");
+  res = await R("POST", "/api/admin/invoices", { body: { userId: aliceRow.id, items: [{ desc: "X", amount: "1.00" }] } });
+  eq(res.status, 401, "invoice send token-gated");
 
   res = await R("PATCH", `/api/admin/cases/${aliceCase.id}`, { headers: { "x-admin-token": cfg.adminToken }, body: { message: "Your statement lives in Account hub → Activity.", status: "pending" } });
   eq(res.status, 200, "admin replies to case");

@@ -894,6 +894,140 @@ on("POST", "/api/admin/withdrawals/:id/decline", needAdmin((ctx) => {
   json(ctx.res, 200, { request: wdPublic(w) });
 }));
 
+/* =================== INVOICES (operator-issued, customer pays) =================== */
+const invPublic = (v) => ({
+  id: v.id, userId: v.userId, items: v.items, totalCents: v.totalCents,
+  dueDate: v.dueDate || "", notes: v.notes || "", status: v.status,
+  createdAt: v.createdAt, sentBy: v.sentBy || "operator-console",
+  paidAt: v.paidAt || null, txnId: v.txnId || "", voidedAt: v.voidedAt || null,
+});
+
+on("GET", "/api/invoices", needAuth((ctx) => {
+  const rows = ctx.db.coll("invoices")
+    .filter((v) => v.userId === ctx.user.id)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+    .map(invPublic);
+  json(ctx.res, 200, { invoices: rows });
+}));
+
+on("POST", "/api/invoices/:id/pay", needAuth((ctx) => {
+  const l = limit(ctx, "invoice_pay", 10, 3600e3); if (l) return l;
+  const db = ctx.db;
+  const user = ctx.user;
+  const inv = db.coll("invoices").find((v) => v.id === ctx.params.id && v.userId === user.id);
+  if (!inv) return err(ctx.res, 404, "no_invoice", "Invoice not found.");
+  if (inv.status === "paid") return err(ctx.res, 409, "already_paid", "This invoice is already paid.");
+  if (inv.status === "voided") return err(ctx.res, 409, "voided", "This invoice was cancelled.");
+  const b = V.pick(ctx.body, ["accountId", "confirmPassword"]);
+  const acct = db.coll("accounts").find((a) => a.id === b.accountId && a.userId === user.id);
+  if (!acct) return err(ctx.res, 404, "no_account", "Account not found.");
+  if (acct.status !== "open") return err(ctx.res, 409, "account_closed", "This account is not open.");
+  /* Step-up authorization, same posture as transfers. */
+  if (!A.verifyPassword(String(b.confirmPassword || ""), user.passwordHash)) {
+    audit(db, ctx, { action: "invoice.attempt", target: inv.id, ok: false, reason: "bad_confirmation", detail: user.username });
+    return err(ctx.res, 403, "bad_confirmation", "Password confirmation is incorrect.");
+  }
+  if (acct.balanceCents < inv.totalCents)
+    return err(ctx.res, 400, "insufficient_funds", `Insufficient funds — available balance is $${(acct.balanceCents / 100).toFixed(2)}.`);
+
+  acct.balanceCents -= inv.totalCents;
+  const txn = {
+    id: uid("t"), userId: user.id, accountId: acct.id,
+    ts: new Date().toISOString(), type: "invoice", status: "completed",
+    label: `Invoice paid — ${inv.id}`,
+    memo: inv.notes ? String(inv.notes).slice(0, 90) : "",
+    amountCents: -inv.totalCents, balanceAfterCents: acct.balanceCents,
+    counterparty: `Invoice ${inv.id}`,
+  };
+  db.coll("txns").push(txn);
+  inv.status = "paid";
+  inv.paidAt = txn.ts;
+  inv.txnId = txn.id;
+  inv.paidAccountId = acct.id;
+  db.save();
+  audit(db, ctx, {
+    action: "invoice.pay", target: `${inv.id}/${acct.id}`,
+    detail: `$${(inv.totalCents / 100).toFixed(2)} paid from ${acct.type} ••••${acct.last4} (${(acct.balanceCents / 100).toFixed(2)} now)`,
+  });
+  forwardEvent(ctx.cfg, "invoice_paid", {
+    id: inv.id, username: user.username, amount: `$${(inv.totalCents / 100).toFixed(2)}`,
+    account: `${acct.name} ••••${acct.last4}`,
+  }, "account.html");
+  json(ctx.res, 200, { invoice: invPublic(inv), account: acctPublic(acct), transaction: txn });
+}));
+
+on("GET", "/api/admin/invoices", needAdmin((ctx) => {
+  const db = ctx.db;
+  const invoices = db.coll("invoices").map((v) => {
+    const u = db.coll("users").find((x) => x.id === v.userId);
+    return {
+      ...invPublic(v),
+      username: u ? u.username : "?",
+      name: u ? u.name : "?",
+    };
+  }).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  json(ctx.res, 200, { invoices });
+}));
+
+on("POST", "/api/admin/invoices", needAdmin((ctx) => {
+  const l = limit(ctx, "invoice_send", 60, 60e3); if (l) return l;
+  const db = ctx.db;
+  const b = V.pick(ctx.body, ["userId", "items"]);
+  const target = db.coll("users").find((u) => u.id === b.userId);
+  if (!target) return err(ctx.res, 404, "no_user", "Customer not found.");
+  const items = Array.isArray(b.items) ? b.items : [];
+  if (items.length < 1 || items.length > 25) throw V.badRequest("An invoice needs 1 to 25 line items.");
+  const clean = items.map((it, i) => {
+    const desc = V.str((it && it.desc) || "", { min: 2, max: 120, name: `Line ${i + 1} description` });
+    const amountCents = V.cents(it && it.amount, { name: `Line ${i + 1} amount`, min: 1, maxCents: 10_000_000 });
+    return { desc, amountCents };
+  });
+  const totalCents = clean.reduce((s, x) => s + x.amountCents, 0);
+  if (totalCents > 100_000_000) throw V.badRequest("Invoice total exceeds the $1,000,000 maximum.");
+  const dueDate = String(b.dueDate || "");
+  if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) throw V.badRequest("Due date must be a calendar date.");
+  const notes = b.notes ? V.str(b.notes, { max: 500, name: "Notes" }) : "";
+  const id = "INV-" + String(db.nextSeq("invoice")).padStart(4, "0");
+  const rec = {
+    id, userId: target.id, items: clean, totalCents, dueDate, notes,
+    status: "open", createdAt: new Date().toISOString(), sentBy: "operator-console",
+    paidAt: null, txnId: "", voidedAt: null,
+  };
+  db.coll("invoices").push(rec);
+  db.save();
+  audit(db, ctx, {
+    actorType: "admin", actorName: "operator-console",
+    action: "admin.invoice", target: `${id}/${target.username}`,
+    detail: `$${(totalCents / 100).toFixed(2)} · ${clean.length} item(s) → ${target.username}${dueDate ? " · due " + dueDate : ""}`,
+  });
+  forwardEvent(ctx.cfg, "invoice_sent", {
+    id, username: target.username, amount: `$${(totalCents / 100).toFixed(2)}`,
+    due: dueDate || "—",
+  }, "account.html");
+  json(ctx.res, 201, { invoice: invPublic(rec) });
+}));
+
+on("POST", "/api/admin/invoices/:id/void", needAdmin((ctx) => {
+  const db = ctx.db;
+  const v = db.coll("invoices").find((x) => x.id === ctx.params.id);
+  if (!v) return err(ctx.res, 404, "no_invoice", "Invoice not found.");
+  if (v.status === "paid") return err(ctx.res, 409, "already_paid", "A paid invoice cannot be cancelled.");
+  if (v.status === "voided") return err(ctx.res, 409, "already_voided", "This invoice is already cancelled.");
+  v.status = "voided";
+  v.voidedAt = new Date().toISOString();
+  db.save();
+  audit(db, ctx, {
+    actorType: "admin", actorName: "operator-console",
+    action: "admin.invoice.void", target: v.id,
+    detail: `$${(v.totalCents / 100).toFixed(2)} cancelled`,
+  });
+  const u = db.coll("users").find((x) => x.id === v.userId);
+  forwardEvent(ctx.cfg, "invoice_voided", {
+    id: v.id, username: u ? u.username : v.userId, amount: `$${(v.totalCents / 100).toFixed(2)}`,
+  }, "account.html");
+  json(ctx.res, 200, { invoice: invPublic(v) });
+}));
+
 /* ------------------------- dispatch ------------------------- */
 function dispatch(ctx) {
   for (const r of routes) {
